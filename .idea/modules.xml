@@ -3,6 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/Clocling.iml" filepath="$PROJECT_DIR$/Clocling.iml" />
+      <module fileurl="file://$PROJECT_DIR$/CredenceDeviceLib/CredenceDeviceLib.iml" filepath="$PROJECT_DIR$/CredenceDeviceLib/CredenceDeviceLib.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
     </modules>
   </component>
