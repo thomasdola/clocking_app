@@ -1,32 +1,66 @@
 package com.eurekacachet.clocling.ui.view.login.modal;
 
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.support.annotation.StringDef;
 import android.support.v4.app.DialogFragment;
+import android.telephony.TelephonyManager;
+import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.Toast;
 
 import com.eurekacachet.clocling.R;
 import com.eurekacachet.clocling.ui.base.BaseActivity;
+import com.jakewharton.rxbinding.widget.RxTextView;
+
+import java.util.HashMap;
 
 import javax.inject.Inject;
+
+import ru.kolotnev.formattedittext.MaskedEditText;
+import rx.Observable;
+import rx.functions.Func1;
 
 public class LoginFragment extends DialogFragment implements LoginFragmentMvpView{
 
     private ProgressDialog mProgressDialog;
+    public static String ARG_DEVICE_ID = "device_id";
+    MaskedEditText mPinField;
+    Button mCancelButton;
+    Button mLoginButton;
 
     @Inject
     LoginFragmentPresenter presenter;
+    private String mDeviceId;
 
     public LoginFragment(){}
 
-    public static LoginFragment newIntent(){
-        return new LoginFragment();
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        if(getArguments() != null){
+            mDeviceId = getArguments().getString(ARG_DEVICE_ID);
+        }
+    }
+
+    public static LoginFragment newInstance(String deviceId){
+        Bundle args = new Bundle();
+        args.putString(ARG_DEVICE_ID, deviceId);
+        LoginFragment fragment = new LoginFragment();
+        fragment.setArguments(args);
+        return fragment;
     }
 
     @Override
@@ -36,27 +70,43 @@ public class LoginFragment extends DialogFragment implements LoginFragmentMvpVie
         presenter.attachView(this);
     }
 
-    @NonNull
+    @Nullable
     @Override
-    public Dialog onCreateDialog(Bundle savedInstanceState) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        return inflater.inflate(R.layout.login_dialog, container);
+    }
 
-        LayoutInflater inflater = getActivity().getLayoutInflater();
+    @Override
+    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        mPinField = (MaskedEditText) view.findViewById(R.id.pinTextField);
+        mCancelButton = (Button) view.findViewById(R.id.cancel_button);
+        mLoginButton = (Button) view.findViewById(R.id.login_button);
+        initListeners();
+    }
 
-        builder.setView(inflater.inflate(R.layout.login_dialog, null))
-                .setPositiveButton(R.string.login_text, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
+    private void initListeners() {
+        mCancelButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                getDialog().dismiss();
+            }
+        });
 
-                    }
-                })
-                .setNegativeButton(R.string.cancel_text, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                        LoginFragment.this.getDialog().dismiss();
-                    }
-                });
-        return builder.create();
+        mLoginButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                String pin = mPinField.getText(true).toString();
+                if(pin.trim().length() == 4){
+                    TelephonyManager telephonyManager = (TelephonyManager)
+                            getActivity().getSystemService(Context.TELEPHONY_SERVICE);
+                    HashMap<String, String> cred = new HashMap<>();
+                    cred.put("pin", pin);
+                    cred.put("device_id", telephonyManager.getDeviceId());
+                    presenter.signIn(cred);
+                }
+            }
+        });
     }
 
     @Override

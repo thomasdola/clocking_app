@@ -71,4 +71,15 @@ public class AuthResponse implements Parcelable {
             return new AuthResponse[size];
         }
     };
+
+    @Override
+    public String toString() {
+        return "AuthResponse{" +
+                "status='" + status + '\'' +
+                ", message='" + message + '\'' +
+                ", code=" + code +
+                ", token='" + token + '\'' +
+                ", userUUID='" + userUUID + '\'' +
+                '}';
+    }
 }

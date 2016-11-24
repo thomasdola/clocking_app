@@ -25,6 +25,7 @@ public class BaseActivity extends AppCompatActivity {
                     .applicationComponent(ClockingApplication.get(this).getComponent())
                     .build();
         }
+
         return mActivityComponent;
     }
 }

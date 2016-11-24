@@ -6,11 +6,11 @@
     <string name="dummy_content">DUMMY\nCONTENT</string>
     <string name="purpose">Mobile Biometric Attendance</string>
     <string name="login_text">login</string>
-    <string name="pin_text">enter pin</string>
+    <string name="pin_text">****</string>
     <string name="sign_in_text">Sign In</string>
     <string name="sign_out_text">Sign Out</string>
     <string name="cancel_text">Cancel</string>
     <string name="loading_text">loading...</string>
-    <string name="registration_text">registration</string>
+    <string name="registration_text">capture bio</string>
     <string name="clocking_text">Clocking</string>
 </resources>

@@ -3,6 +3,7 @@ package com.eurekacachet.clocling.data.local;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.util.Log;
 
 import com.eurekacachet.clocling.injection.context.ApplicationContext;
 
@@ -17,6 +18,7 @@ public class PreferencesHelper {
     public static final String KEY_ACCESS_TOKEN = "token";
     private static final String KEY_IS_LOGIN = "is_login";
     private static final String KEY_USER_UUID = "user_uuid";
+    private static final String KEY_DEVICE_ID = "device_id";
 
     private final SharedPreferences mPreferences;
 
@@ -34,12 +36,7 @@ public class PreferencesHelper {
                 .apply();
     }
     public Observable<String> getAccessToken(){
-        return Observable.create(new Observable.OnSubscribe<String>() {
-            @Override
-            public void call(Subscriber<? super String> subscriber) {
-                mPreferences.getString(KEY_ACCESS_TOKEN, "");
-            }
-        });
+        return Observable.just(mPreferences.getString(KEY_ACCESS_TOKEN, null));
     }
 
     public void setLogin(boolean loggedIn) {
@@ -48,12 +45,10 @@ public class PreferencesHelper {
     }
 
     public Observable<Boolean> getLogin(){
-        return Observable.create(new Observable.OnSubscribe<Boolean>() {
-            @Override
-            public void call(Subscriber<? super Boolean> subscriber) {
-                mPreferences.getString(KEY_IS_LOGIN, "");
-            }
-        });
+        Log.d("MainActivityPresenter", "getLogin");
+        return Observable.just(
+                mPreferences.getBoolean(KEY_IS_LOGIN, false)
+        );
     }
 
     public void setUserUUID(String userUUID) {
@@ -62,11 +57,15 @@ public class PreferencesHelper {
     }
 
     public Observable<String> getUserUUID(){
-        return Observable.create(new Observable.OnSubscribe<String>() {
-            @Override
-            public void call(Subscriber<? super String> subscriber) {
-                mPreferences.getString(KEY_USER_UUID, "");
-            }
-        });
+        return Observable.just(mPreferences.getString(KEY_USER_UUID, null));
+    }
+
+    public void setDeviceId(String deviceId) {
+        mPreferences.edit().putString(KEY_DEVICE_ID, deviceId)
+                .apply();
+    }
+
+    public Observable<String> getDeviceId(){
+        return Observable.just(mPreferences.getString(KEY_DEVICE_ID, null));
     }
 }

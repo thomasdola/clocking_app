@@ -13,7 +13,7 @@ import com.credenceid.biometrics.Biometrics;
 import com.credenceid.biometrics.BiometricsActivity;
 import com.eurekacachet.clocling.R;
 
-public class MainActivity extends BiometricsActivity {
+public class UnMainActivity extends BiometricsActivity {
 
     ImageView fingerPrintView;
     Button  grabFingerPrintButton;

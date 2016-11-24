@@ -6,7 +6,10 @@ import com.eurekacachet.clocling.ui.base.BasePresenter;
 
 import javax.inject.Inject;
 
+import rx.Subscriber;
 import rx.Subscription;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.schedulers.Schedulers;
 
 public class LoginPresenter extends BasePresenter<LoginMvpView> {
 
@@ -31,7 +34,28 @@ public class LoginPresenter extends BasePresenter<LoginMvpView> {
 
     public void login(){}
 
-    public void setPreferences(){}
+    public void getDeviceId(){
+        checkViewAttached();
+        mSubscription = mDataManager.getDeviceId()
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeOn(Schedulers.io())
+                .subscribe(new Subscriber<String>() {
+                    @Override
+                    public void onCompleted() {
+
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        e.printStackTrace();
+                    }
+
+                    @Override
+                    public void onNext(String deviceId) {
+                        getMvpView().setDeviceId(deviceId);
+                    }
+                });
+    }
 
     public void saveCredentials(){}
 }

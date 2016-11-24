@@ -5,7 +5,7 @@ import com.eurekacachet.clocling.ui.base.MvpView;
 
 public interface LoginMvpView extends MvpView {
 
-//    void showLoginFailed(String reason);
+    void setDeviceId(String deviceId);
 //
 //    void toggleLoading(Boolean loading);
 //

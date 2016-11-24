@@ -3,6 +3,7 @@ package com.eurekacachet.clocling.data.remote;
 
 import com.eurekacachet.clocling.data.local.PreferencesHelper;
 import com.eurekacachet.clocling.data.model.AuthResponse;
+import com.eurekacachet.clocling.utils.Constants;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
@@ -23,10 +24,8 @@ import rx.Observable;
 
 public interface ClockingService {
 
-    String ENDPOINT = "http://localhost/api/";
-
     @FormUrlEncoded
-    @POST("login")
+    @POST("/auth/login")
     Observable<AuthResponse> login(@FieldMap Map<String, String> credentials);
 
     class Creator{
@@ -47,11 +46,10 @@ public interface ClockingService {
                 }
             };
 
-            OkHttpClient client = new OkHttpClient();
-            client.interceptors().add(mInterceptor);
+            OkHttpClient client = new OkHttpClient.Builder().addInterceptor(mInterceptor).build();
 
             Retrofit retrofit = new Retrofit.Builder()
-                    .baseUrl(ClockingService.ENDPOINT)
+                    .baseUrl(Constants.SERVER_URL)
                     .addConverterFactory(GsonConverterFactory.create(gson))
                     .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
                     .client(client)

@@ -1,6 +1,8 @@
 package com.eurekacachet.clocling.data;
 
 
+import android.util.Log;
+
 import com.eurekacachet.clocling.data.local.PreferencesHelper;
 import com.eurekacachet.clocling.data.model.AuthResponse;
 import com.eurekacachet.clocling.data.remote.ClockingService;
@@ -11,6 +13,7 @@ import javax.inject.Inject;
 
 import rx.Observable;
 import rx.Subscriber;
+import rx.Subscription;
 import rx.functions.Func0;
 
 public class DataManager {
@@ -55,5 +58,9 @@ public class DataManager {
 
     public Observable<String> getUserUUID(){
         return mPreferencesHelper.getUserUUID();
+    }
+
+    public Observable<String> getDeviceId() {
+        return mPreferencesHelper.getDeviceId();
     }
 }

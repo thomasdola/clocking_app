@@ -7,5 +7,7 @@ public interface HomeMvpView extends MvpView {
 
     void launchLoginActivity();
 
-    void launchRegistrationActivity();
+    void launchBioDataCaptureActivity();
+
+    void setUserUUID(String UUID);
 }

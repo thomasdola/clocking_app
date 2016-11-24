@@ -1,6 +1,8 @@
 package com.eurekacachet.clocling.ui.view.login.modal;
 
 
+import android.util.Log;
+
 import com.eurekacachet.clocling.data.DataManager;
 import com.eurekacachet.clocling.data.model.AuthResponse;
 import com.eurekacachet.clocling.ui.base.BasePresenter;
@@ -52,10 +54,12 @@ public class LoginFragmentPresenter extends BasePresenter<LoginFragmentMvpView> 
                     public void onError(Throwable e) {
                         e.printStackTrace();
                         getMvpView().onSignInFailed(e.getMessage());
+                        getMvpView().toggleLoading(false);
                     }
 
                     @Override
                     public void onNext(AuthResponse authResponse) {
+                        Log.d("LoginFragmentPresenter", authResponse.toString());
                         if(authResponse.getCode() == 200){
                             if(authResponse.getToken() != null){
                                 mDataManager.setToken(authResponse.getToken());
@@ -68,6 +72,7 @@ public class LoginFragmentPresenter extends BasePresenter<LoginFragmentMvpView> 
                             getMvpView().toggleLoading(false);
                         }else{
                             getMvpView().onSignInFailed(authResponse.getMessage());
+                            getMvpView().toggleLoading(false);
                         }
                     }
                 });
