@@ -3,6 +3,7 @@ package com.eurekacachet.clocling.injection.component;
 
 import com.eurekacachet.clocling.injection.module.ActivityModule;
 import com.eurekacachet.clocling.injection.scope.PerActivity;
+import com.eurekacachet.clocling.ui.view.bio.BioActivity;
 import com.eurekacachet.clocling.ui.view.login.LoginActivity;
 import com.eurekacachet.clocling.ui.view.login.modal.LoginFragment;
 import com.eurekacachet.clocling.ui.view.main.MainActivity;
@@ -19,4 +20,6 @@ public interface ActivityComponent {
     void inject(LoginFragment loginFragment);
 
     void inject(MainActivity mainActivity);
+
+    void inject(BioActivity bioActivity);
 }

@@ -7,6 +7,7 @@ import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -23,6 +24,7 @@ import android.widget.Toast;
 
 import com.eurekacachet.clocling.R;
 import com.eurekacachet.clocling.ui.base.BaseActivity;
+import com.eurekacachet.clocling.ui.view.main.MainActivity;
 import com.jakewharton.rxbinding.widget.RxTextView;
 
 import java.util.HashMap;
@@ -129,7 +131,9 @@ public class LoginFragment extends DialogFragment implements LoginFragmentMvpVie
 
     @Override
     public void launchMainActivity() {
+        Intent intent = new Intent(getActivity(), MainActivity.class);
         getDialog().dismiss();
+        startActivity(intent);
     }
 
     @Override

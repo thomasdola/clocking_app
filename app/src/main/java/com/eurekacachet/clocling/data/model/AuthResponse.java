@@ -7,33 +7,33 @@ import android.support.annotation.Nullable;
 
 public class AuthResponse implements Parcelable {
 
-    public String status;
-    public String message;
-    public int code;
+    String status;
+    String message;
+    int code;
     @Nullable
-    public String token;
+    String token;
     @Nullable
-    public String userUUID;
+    String userUUID;
 
-    public int getCode() {
+    public int code() {
         return code;
     }
 
-    public String getStatus() {
+    public String status() {
         return status;
     }
 
-    public String getMessage() {
+    public String message() {
         return message;
     }
 
     @Nullable
-    public String getToken() {
+    public String token() {
         return token;
     }
 
     @Nullable
-    public String getUserUUID() {
+    public String userUUID() {
         return userUUID;
     }
 
@@ -54,6 +54,7 @@ public class AuthResponse implements Parcelable {
     }
 
     protected AuthResponse(Parcel in) {
+
         this.status = in.readString();
         this.message = in.readString();
         this.code = in.readInt();

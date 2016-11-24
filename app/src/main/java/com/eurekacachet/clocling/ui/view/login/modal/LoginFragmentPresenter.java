@@ -60,18 +60,18 @@ public class LoginFragmentPresenter extends BasePresenter<LoginFragmentMvpView> 
                     @Override
                     public void onNext(AuthResponse authResponse) {
                         Log.d("LoginFragmentPresenter", authResponse.toString());
-                        if(authResponse.getCode() == 200){
-                            if(authResponse.getToken() != null){
-                                mDataManager.setToken(authResponse.getToken());
+                        if(authResponse.code() == 200){
+                            if(authResponse.token() != null){
+                                mDataManager.setToken(authResponse.token());
                             }
-                            if(authResponse.getUserUUID() != null){
-                                mDataManager.setUserUUID(authResponse.getUserUUID());
+                            if(authResponse.userUUID() != null){
+                                mDataManager.setUserUUID(authResponse.userUUID());
                             }
                             mDataManager.setLogin(true);
                             getMvpView().launchMainActivity();
                             getMvpView().toggleLoading(false);
                         }else{
-                            getMvpView().onSignInFailed(authResponse.getMessage());
+                            getMvpView().onSignInFailed(authResponse.message());
                             getMvpView().toggleLoading(false);
                         }
                     }

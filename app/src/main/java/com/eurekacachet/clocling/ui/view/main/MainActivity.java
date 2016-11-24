@@ -1,6 +1,7 @@
 package com.eurekacachet.clocling.ui.view.main;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.telephony.TelephonyManager;
 import android.util.Log;
@@ -10,6 +11,7 @@ import android.widget.Button;
 import com.eurekacachet.clocling.ClockingApplication;
 import com.eurekacachet.clocling.R;
 import com.eurekacachet.clocling.ui.base.BaseActivity;
+import com.eurekacachet.clocling.ui.view.bio.BioActivity;
 import com.eurekacachet.clocling.ui.view.login.LoginActivity;
 import com.eurekacachet.clocling.utils.Constants;
 
@@ -63,6 +65,13 @@ public class MainActivity extends BaseActivity implements HomeMvpView {
                 Log.d("MainActivityPresenter", "launch clocking page");
             }
         });
+
+        mCaptureBioButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                presenter.captureBioData("");
+            }
+        });
     }
 
     private Emitter.Listener onCaptureBioData = new Emitter.Listener() {
@@ -93,7 +102,7 @@ public class MainActivity extends BaseActivity implements HomeMvpView {
 
     @Override
     public void launchBioDataCaptureActivity() {
-
+        startActivity(new Intent(this, BioActivity.class));
     }
 
     @Override

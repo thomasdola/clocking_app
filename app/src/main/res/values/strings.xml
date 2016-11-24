@@ -10,7 +10,18 @@
     <string name="sign_in_text">Sign In</string>
     <string name="sign_out_text">Sign Out</string>
     <string name="cancel_text">Cancel</string>
+    <string name="back_text">Back</string>
     <string name="loading_text">loading...</string>
     <string name="registration_text">capture bio</string>
     <string name="clocking_text">Clocking</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="next_text">next</string>
+    <string name="capture">capture</string>
+    <string name="left_index">Left Index</string>
+    <string name="right_index">Right Index</string>
+    <string name="right_thumb">Right Thumb</string>
+    <string name="left_thumb">Left Thumb</string>
+    <string name="portrait">Portrait</string>
 </resources>
