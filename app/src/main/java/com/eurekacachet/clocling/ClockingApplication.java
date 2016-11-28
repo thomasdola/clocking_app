@@ -38,6 +38,7 @@ public class ClockingApplication extends Application{
     public void onCreate() {
         super.onCreate();
         sClockingApplication = this;
+        mSocket.connect();
     }
 
     public static ClockingApplication get(Context context){

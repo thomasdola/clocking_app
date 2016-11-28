@@ -1,7 +1,7 @@
 package com.eurekacachet.clocling.ui.view.bio.pages;
 
 
-import com.eurekacachet.clocling.ui.view.bio.fragments.ThumbLeftFragment;
+import com.eurekacachet.clocling.ui.view.bio.fragments.thumb_left.ThumbLeftFragment;
 
 import me.panavtec.wizard.WizardPage;
 

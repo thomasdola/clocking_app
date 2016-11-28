@@ -1,8 +1,10 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    android:background="@color/colorPrimaryDark"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.eurekacachet.clocling.ui.view.bio.fragments.IndexRightFragment">
+
+    tools:context=".ui.view.bio.fragments.index_right.IndexRightFragment">
 
     <!-- TODO: Update blank fragment layout -->
 
@@ -12,9 +14,11 @@
         android:layout_gravity="center_horizontal|top">
 
         <Button
-            style="?android:attr/buttonStyleSmall"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:textColor="@color/white"
+            android:background="@drawable/sec_action_button_background"
+            android:textAllCaps="false"
+            android:layout_width="150dp"
+            android:layout_height="60dp"
             android:text="@string/back_text"
             android:id="@+id/backButton"
             android:layout_alignParentBottom="true"
@@ -22,9 +26,11 @@
             android:layout_alignParentStart="true" />
 
         <Button
-            style="?android:attr/buttonStyleSmall"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:textColor="@color/white"
+            android:background="@drawable/sec_action_button_background"
+            android:textAllCaps="false"
+            android:layout_width="150dp"
+            android:layout_height="60dp"
             android:text="@string/next_text"
             android:id="@+id/nextButton"
             android:layout_alignBottom="@+id/backButton"
@@ -32,32 +38,38 @@
             android:layout_alignParentEnd="true" />
 
         <TextView
+            android:textStyle="bold"
+            android:textColor="@color/white"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textAppearance="?android:attr/textAppearanceMedium"
             android:text="@string/right_index"
-            android:id="@+id/pictureView"
+            android:id="@+id/headerView"
             android:layout_alignParentTop="true"
             android:layout_centerHorizontal="true"
-            android:layout_marginTop="29dp" />
+            android:layout_marginTop="30dp" />
 
         <ImageView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/fingerImageView"
-            android:layout_below="@+id/pictureView"
-            android:layout_alignLeft="@+id/pictureView"
-            android:layout_alignStart="@+id/pictureView"
-            android:layout_marginTop="69dp"
+            android:background="@drawable/finger_picture_background"
+            android:layout_width="200dp"
+            android:layout_height="300dp"
+            android:id="@+id/fingerView"
+            android:layout_alignParentTop="true"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="75dp"
             android:contentDescription="@null" />
 
         <Button
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:textColor="@color/white"
+            android:background="@drawable/button_background"
+            android:textAllCaps="false"
+            android:layout_width="200dp"
+            android:layout_height="70dp"
             android:text="@string/capture"
-            android:id="@+id/button3"
-            android:layout_above="@+id/nextButton"
+            android:id="@+id/captureButton"
+            android:layout_above="@+id/backButton"
             android:layout_centerHorizontal="true"
-            android:layout_marginBottom="56dp" />
+            android:layout_marginBottom="30dp" />
+
     </RelativeLayout>
 </FrameLayout>

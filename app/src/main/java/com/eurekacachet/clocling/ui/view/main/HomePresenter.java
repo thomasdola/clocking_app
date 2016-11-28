@@ -41,7 +41,7 @@ public class HomePresenter extends BasePresenter<MainActivity> {
 
     public void isLoggedIn(){
         checkViewAttached();
-        Log.d("MainActivityPresenter", "isLoggedIn called");
+//        Log.d("MainActivityPresenter", "isLoggedIn called");
         mSubscription = mDataManager
                 .isLoggedIn()
                 .observeOn(AndroidSchedulers.mainThread())
@@ -59,7 +59,7 @@ public class HomePresenter extends BasePresenter<MainActivity> {
 
                     @Override
                     public void onNext(Boolean isLoggedIn) {
-                        Log.d("MainActivityPresenter", String.format("user in ? =>  %s", isLoggedIn));
+//                        Log.d("MainActivityPresenter", String.format("user in ? =>  %s", isLoggedIn));
                         if(! isLoggedIn){
                             getMvpView().launchLoginActivity();
                         }
@@ -69,7 +69,7 @@ public class HomePresenter extends BasePresenter<MainActivity> {
 
     public void getUserUUID() {
         checkViewAttached();
-        Log.d("MainActivityPresenter", "getUserUUID called");
+//        Log.d("MainActivityPresenter", "getUserUUID called");
         mSubscription = mDataManager
                 .getUserUUID()
                 .observeOn(AndroidSchedulers.mainThread())
@@ -87,7 +87,7 @@ public class HomePresenter extends BasePresenter<MainActivity> {
 
                     @Override
                     public void onNext(String UUID) {
-                        Log.d("MainActivityPresenter", String.format("user uuid %s", UUID));
+//                        Log.d("MainActivityPresenter", String.format("user uuid %s", UUID));
                         getMvpView().setUserUUID(UUID);
                     }
                 });

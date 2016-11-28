@@ -4,6 +4,7 @@ import android.app.Application;
 import android.content.Context;
 
 import com.eurekacachet.clocling.data.DataManager;
+import com.eurekacachet.clocling.data.local.DatabaseHelper;
 import com.eurekacachet.clocling.data.local.PreferencesHelper;
 import com.eurekacachet.clocling.data.remote.ClockingService;
 import com.eurekacachet.clocling.injection.context.ApplicationContext;
@@ -24,6 +25,8 @@ public interface ApplicationComponent {
     ClockingService clockingService();
 
     PreferencesHelper preferencesHelper();
+
+    DatabaseHelper databaseHelper();
 
     DataManager dataManager();
 }

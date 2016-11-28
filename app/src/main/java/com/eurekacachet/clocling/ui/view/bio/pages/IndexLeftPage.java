@@ -1,6 +1,6 @@
 package com.eurekacachet.clocling.ui.view.bio.pages;
 
-import com.eurekacachet.clocling.ui.view.bio.fragments.IndexLeftFragment;
+import com.eurekacachet.clocling.ui.view.bio.fragments.index_left.IndexLeftFragment;
 
 import me.panavtec.wizard.WizardPage;
 

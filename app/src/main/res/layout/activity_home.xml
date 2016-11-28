@@ -10,20 +10,26 @@
     tools:context="com.eurekacachet.clocling.ui.view.main.MainActivity">
 
     <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:textColor="@color/white"
+        android:background="@drawable/button_background"
+        android:textAllCaps="false"
+        android:layout_width="150dp"
+        android:layout_height="60dp"
         android:text="@string/clocking_text"
         android:id="@+id/clocking_button"
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="107dp" />
+        android:layout_marginTop="100dp" />
 
     <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:textColor="@color/white"
+        android:background="@drawable/button_background"
+        android:textAllCaps="false"
+        android:layout_width="150dp"
+        android:layout_height="60dp"
         android:text="@string/registration_text"
         android:id="@+id/bio_button"
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
-        android:layout_marginBottom="124dp" />
+        android:layout_marginBottom="100dp" />
 </RelativeLayout>

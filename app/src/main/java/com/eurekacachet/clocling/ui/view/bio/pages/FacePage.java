@@ -1,6 +1,6 @@
 package com.eurekacachet.clocling.ui.view.bio.pages;
 
-import com.eurekacachet.clocling.ui.view.bio.fragments.FaceFragment;
+import com.eurekacachet.clocling.ui.view.bio.fragments.portrait.FaceFragment;
 
 import me.panavtec.wizard.WizardPage;
 

@@ -12,8 +12,10 @@ import com.eurekacachet.clocling.ClockingApplication;
 import com.eurekacachet.clocling.R;
 import com.eurekacachet.clocling.ui.base.BaseActivity;
 import com.eurekacachet.clocling.ui.view.bio.BioActivity;
+import com.eurekacachet.clocling.ui.view.clocking.ClockingActivity;
 import com.eurekacachet.clocling.ui.view.login.LoginActivity;
 import com.eurekacachet.clocling.utils.Constants;
+import com.eurekacachet.clocling.utils.SocketListeners;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -22,7 +24,6 @@ import javax.inject.Inject;
 
 import io.socket.client.Socket;
 import io.socket.emitter.Emitter;
-import timber.log.Timber;
 
 public class MainActivity extends BaseActivity implements HomeMvpView {
 
@@ -39,30 +40,36 @@ public class MainActivity extends BaseActivity implements HomeMvpView {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         getActivityComponent().inject(this);
+        ClockingApplication application = (ClockingApplication) getApplication();
+        mSocket = application.getSocket();
         setContentView(R.layout.activity_home);
         initView();
         presenter.attachView(this);
         presenter.isLoggedIn();
         presenter.getUserUUID();
-        ClockingApplication application = (ClockingApplication) getApplication();
         telephonyManager = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
-        mSocket = application.getSocket();
         initListeners();
     }
 
     private void initView() {
         mCaptureBioButton = (Button) findViewById(R.id.bio_button);
-//        mCaptureBioButton.setActivated(false);
+//        mCaptureBioButton.setEnabled(false);
         mClockingButton = (Button) findViewById(R.id.clocking_button);
     }
 
     private void initListeners() {
+        mSocket.on(Socket.EVENT_CONNECT, onConnect);
+        mSocket.on(Socket.EVENT_DISCONNECT, SocketListeners.onDisconnect(this));
+        mSocket.on(Socket.EVENT_CONNECT_ERROR, onError);
+        mSocket.on(Socket.EVENT_CONNECT_TIMEOUT, onError);
         mSocket.on(Constants.makeEvent(mUserUUID, "CaptureBioData"), onCaptureBioData);
+        mSocket.on("*", testListener);
+
         mClockingButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                //launch clocking page
-                Log.d("MainActivityPresenter", "launch clocking page");
+                Log.d(this.getClass().getSimpleName(), "launch clocking page");
+                launchClockingActivity();
             }
         });
 
@@ -72,6 +79,21 @@ public class MainActivity extends BaseActivity implements HomeMvpView {
                 presenter.captureBioData("");
             }
         });
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        mSocket.off(Socket.EVENT_CONNECT, onConnect);
+        mSocket.off(Socket.EVENT_DISCONNECT, SocketListeners.onDisconnect(this));
+        mSocket.off(Socket.EVENT_CONNECT_ERROR, onError);
+        mSocket.off(Socket.EVENT_CONNECT_TIMEOUT, onError);
+        mSocket.off("*", testListener);
+        mSocket.off(Constants.makeEvent(mUserUUID, "CaptureBioData"), onCaptureBioData);
+    }
+
+    private void launchClockingActivity() {
+        startActivity(new Intent(this, ClockingActivity.class));
     }
 
     private Emitter.Listener onCaptureBioData = new Emitter.Listener() {
@@ -87,9 +109,31 @@ public class MainActivity extends BaseActivity implements HomeMvpView {
                     } catch (JSONException e){
                         return;
                     }
-                    presenter.captureBioData(bid);
+                    Log.d("MainActivity", String.format("socket:bid -> %s", bid));
+//                    presenter.captureBioData(bid);
                 }
             });
+        }
+    };
+
+    private Emitter.Listener onConnect = new Emitter.Listener() {
+        @Override
+        public void call(Object... args) {
+            Log.d(this.getClass().getSimpleName(), "connect...");
+        }
+    };
+
+    private Emitter.Listener onError = new Emitter.Listener() {
+        @Override
+        public void call(Object... args) {
+            Log.d(this.getClass().getSimpleName(), "error...");
+        }
+    };
+
+    private Emitter.Listener testListener = new Emitter.Listener() {
+        @Override
+        public void call(Object... args) {
+            Log.d(this.getClass().getSimpleName(), "receiving...");
         }
     };
 
@@ -103,6 +147,7 @@ public class MainActivity extends BaseActivity implements HomeMvpView {
     @Override
     public void launchBioDataCaptureActivity() {
         startActivity(new Intent(this, BioActivity.class));
+        finish();
     }
 
     @Override
