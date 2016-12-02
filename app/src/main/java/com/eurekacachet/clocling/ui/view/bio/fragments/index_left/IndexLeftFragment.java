@@ -15,6 +15,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.credenceid.biometrics.Biometrics;
+import com.credenceid.biometrics.BiometricsManager;
 import com.eurekacachet.clocling.R;
 import com.eurekacachet.clocling.ui.base.BaseActivity;
 import com.eurekacachet.clocling.ui.view.bio.BioActivity;
@@ -38,6 +39,9 @@ public class IndexLeftFragment extends Fragment implements IndexLeftMvpView {
     String mIndexLeft;
 
     @Inject IndexLeftPresenter presenter;
+    private BiometricsManager mBiometricsManager;
+    private FileStore mFileStore;
+    private Bitmap mIndexLeftBitmap;
 
     public IndexLeftFragment() {
         // Required empty public constructor
@@ -58,6 +62,9 @@ public class IndexLeftFragment extends Fragment implements IndexLeftMvpView {
         super.onActivityCreated(savedInstanceState);
         ((BaseActivity) getActivity()).getActivityComponent().inject(this);
         presenter.attachView(this);
+        mBiometricsManager = ((BioActivity) getActivity())
+                .getBiometricsManager();
+        mFileStore = new FileStore(getContext());
     }
 
     @Override
@@ -85,17 +92,24 @@ public class IndexLeftFragment extends Fragment implements IndexLeftMvpView {
             public void onClick(View view) {
                 headerView.setText(R.string.loading_text);
                 fingerView.setImageDrawable(null);
-
-                ((BioActivity) getActivity())
-                        .getBiometricsManager()
+                mBiometricsManager
                         .grabFingerprint(Biometrics.ScanType.SINGLE_FINGER, new Biometrics.OnFingerprintGrabbedListener() {
                             @Override
                             public void onFingerprintGrabbed(Biometrics.ResultCode resultCode, Bitmap bitmap, byte[] bytes, String filePath, String status) {
                                 if(status != null) headerView.setText(status);
                                 if(bitmap != null) {
                                     fingerView.setImageBitmap(bitmap);
-                                    presenter.setCurrentIndexLeftPath((new FileStore(getContext()))
-                                            .save(bitmap, Constants.INDEX_LEFT).getAbsolutePath());
+                                    mIndexLeftBitmap = bitmap;
+
+                                    mBiometricsManager.convertToFmd(mIndexLeftBitmap, Biometrics.FmdFormat.ANSI_378_2004, new Biometrics.OnConvertToFmdListener() {
+                                        @Override
+                                        public void onConvertToFmd(Biometrics.ResultCode resultCode, byte[] fmd) {
+                                            presenter.setCurrentIndexLeft(
+                                                    mFileStore.save(mIndexLeftBitmap, Constants.INDEX_LEFT).getAbsolutePath(),
+                                                    mFileStore.save(fmd, Constants.INDEX_LEFT_FMD).getAbsolutePath()
+                                            );
+                                        }
+                                    });
                                 }
                             }
 

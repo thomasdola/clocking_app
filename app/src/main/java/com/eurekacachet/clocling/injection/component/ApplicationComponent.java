@@ -9,6 +9,9 @@ import com.eurekacachet.clocling.data.local.PreferencesHelper;
 import com.eurekacachet.clocling.data.remote.ClockingService;
 import com.eurekacachet.clocling.injection.context.ApplicationContext;
 import com.eurekacachet.clocling.injection.module.ApplicationModule;
+import com.eurekacachet.clocling.utils.RxEventBus;
+import com.eurekacachet.clocling.utils.services.SocketService;
+import com.eurekacachet.clocling.utils.services.SyncService;
 
 import javax.inject.Singleton;
 
@@ -29,4 +32,10 @@ public interface ApplicationComponent {
     DatabaseHelper databaseHelper();
 
     DataManager dataManager();
+
+    RxEventBus eventBus();
+
+    void inject(SyncService syncService);
+
+    void inject(SocketService socketService);
 }

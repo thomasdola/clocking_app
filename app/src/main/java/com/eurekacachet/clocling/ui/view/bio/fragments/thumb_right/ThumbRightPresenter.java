@@ -4,6 +4,7 @@ import android.util.Log;
 
 import com.eurekacachet.clocling.data.DataManager;
 import com.eurekacachet.clocling.ui.base.BasePresenter;
+import com.eurekacachet.clocling.utils.Constants;
 
 import javax.inject.Inject;
 
@@ -36,13 +37,15 @@ public class ThumbRightPresenter extends BasePresenter<ThumbRightFragment> {
 
     public void getCurrentThumbRight(){
         checkViewAttached();
-        String path = mDataManager.getThumbRightPath();
+        String path = mDataManager.getPath(Constants.THUMB_RIGHT);
         Log.d(this.getClass().getSimpleName(), String.format("getCurrentThumbRight with -> %s", path));
         getMvpView().currentThumbRight(path);
     }
 
-    public void setCurrentThumb(String path){
+    public void setCurrentThumbRight(String path, String fmdPath){
         checkViewAttached();
-        mDataManager.setThumbRight(path);
+        mDataManager.setPath(Constants.THUMB_RIGHT, path);
+        mDataManager.setPath(Constants.THUMB_RIGHT_FMD, fmdPath);
+        Log.d(getClass().getSimpleName(), fmdPath);
     }
 }

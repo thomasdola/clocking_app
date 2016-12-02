@@ -1,9 +1,11 @@
 package com.eurekacachet.clocling.ui.view.main;
 
+import android.content.Intent;
 import android.util.Log;
 
 import com.eurekacachet.clocling.data.DataManager;
 import com.eurekacachet.clocling.ui.base.BasePresenter;
+import com.eurekacachet.clocling.utils.services.SocketService;
 
 import javax.inject.Inject;
 
@@ -42,29 +44,11 @@ public class HomePresenter extends BasePresenter<MainActivity> {
     public void isLoggedIn(){
         checkViewAttached();
 //        Log.d("MainActivityPresenter", "isLoggedIn called");
-        mSubscription = mDataManager
-                .isLoggedIn()
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribeOn(Schedulers.io())
-                .subscribe(new Subscriber<Boolean>() {
-                    @Override
-                    public void onCompleted() {
-
-                    }
-
-                    @Override
-                    public void onError(Throwable e) {
-                        e.printStackTrace();
-                    }
-
-                    @Override
-                    public void onNext(Boolean isLoggedIn) {
-//                        Log.d("MainActivityPresenter", String.format("user in ? =>  %s", isLoggedIn));
-                        if(! isLoggedIn){
-                            getMvpView().launchLoginActivity();
-                        }
-                    }
-                });
+        if(!mDataManager.isLoggedIn()){
+            getMvpView().launchLoginActivity();
+        }else{
+            getMvpView().startService(new Intent(getMvpView(), SocketService.class));
+        }
     }
 
     public void getUserUUID() {

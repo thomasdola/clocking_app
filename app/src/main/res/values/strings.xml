@@ -32,4 +32,6 @@
     <string name="scan">Scan</string>
     <string name="close">close</string>
     <string name="verified">Verified</string>
+    <string name="start_text">start</string>
+    <string name="reviewing_text">reviewing…</string>
 </resources>

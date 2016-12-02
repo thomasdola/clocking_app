@@ -41,7 +41,7 @@ public class LoginFragmentPresenter extends BasePresenter<LoginFragmentMvpView> 
     public void signIn(HashMap<String, String> credentials){
         checkViewAttached();
         getMvpView().toggleLoading(true);
-        mDataManager.signIn(credentials)
+        mSubscription = mDataManager.signIn(credentials)
                 .subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Subscriber<AuthResponse>() {
@@ -68,6 +68,7 @@ public class LoginFragmentPresenter extends BasePresenter<LoginFragmentMvpView> 
                                 mDataManager.setUserUUID(authResponse.userUUID());
                             }
                             mDataManager.setLogin(true);
+                            getMvpView().startSocketService();
                             getMvpView().launchMainActivity();
                             getMvpView().toggleLoading(false);
                         }else{

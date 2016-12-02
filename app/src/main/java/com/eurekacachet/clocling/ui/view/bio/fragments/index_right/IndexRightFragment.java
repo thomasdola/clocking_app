@@ -15,6 +15,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.credenceid.biometrics.Biometrics;
+import com.credenceid.biometrics.BiometricsManager;
 import com.eurekacachet.clocling.R;
 import com.eurekacachet.clocling.ui.base.BaseActivity;
 import com.eurekacachet.clocling.ui.view.bio.BioActivity;
@@ -38,6 +39,9 @@ public class IndexRightFragment extends Fragment implements IndexRightMvpView {
     String mIndexRight;
 
     @Inject IndexRightPresenter presenter;
+    private BiometricsManager mBiometricsManager;
+    private FileStore mFileStore;
+    private Bitmap mIndexRightBitmap;
 
     public IndexRightFragment() {
         // Required empty public constructor
@@ -58,6 +62,9 @@ public class IndexRightFragment extends Fragment implements IndexRightMvpView {
         super.onActivityCreated(savedInstanceState);
         ((BaseActivity) getActivity()).getActivityComponent().inject(this);
         presenter.attachView(this);
+        mBiometricsManager = ((BioActivity) getActivity())
+                .getBiometricsManager();
+        mFileStore = new FileStore(getContext());
     }
 
     @Override
@@ -85,17 +92,24 @@ public class IndexRightFragment extends Fragment implements IndexRightMvpView {
             public void onClick(View view) {
                 headerView.setText(R.string.loading_text);
                 fingerView.setImageDrawable(null);
-
-                ((BioActivity) getActivity())
-                        .getBiometricsManager()
+                mBiometricsManager
                         .grabFingerprint(Biometrics.ScanType.SINGLE_FINGER, new Biometrics.OnFingerprintGrabbedListener() {
                             @Override
                             public void onFingerprintGrabbed(Biometrics.ResultCode resultCode, Bitmap bitmap, byte[] bytes, String filePath, String status) {
                                 if(status != null) headerView.setText(status);
                                 if(bitmap != null) {
                                     fingerView.setImageBitmap(bitmap);
-                                    presenter.setCurrentIndexRightPath((new FileStore(getContext()))
-                                            .save(bitmap, Constants.INDEX_RIGHT).getAbsolutePath());
+                                    mIndexRightBitmap = bitmap;
+
+                                    mBiometricsManager.convertToFmd(mIndexRightBitmap, Biometrics.FmdFormat.ANSI_378_2004, new Biometrics.OnConvertToFmdListener() {
+                                        @Override
+                                        public void onConvertToFmd(Biometrics.ResultCode resultCode, byte[] fmd) {
+                                            presenter.setCurrentIndexRight(
+                                                    mFileStore.save(mIndexRightBitmap, Constants.INDEX_RIGHT).getAbsolutePath(),
+                                                    mFileStore.save(fmd, Constants.INDEX_RIGHT_FMD).getAbsolutePath()
+                                            );
+                                        }
+                                    });
                                 }
                             }
 

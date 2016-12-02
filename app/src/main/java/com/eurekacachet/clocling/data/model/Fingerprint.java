@@ -9,7 +9,7 @@ import java.util.Arrays;
 public class Fingerprint implements Parcelable {
 
     public String bid;
-    public String fingerType;
+    public String finger_type;
     public byte[] fingerprint;
 
 
@@ -21,7 +21,7 @@ public class Fingerprint implements Parcelable {
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeString(this.bid);
-        dest.writeString(this.fingerType);
+        dest.writeString(this.finger_type);
         dest.writeByteArray(this.fingerprint);
     }
 
@@ -30,7 +30,7 @@ public class Fingerprint implements Parcelable {
 
     protected Fingerprint(Parcel in) {
         this.bid = in.readString();
-        this.fingerType = in.readString();
+        this.finger_type = in.readString();
         this.fingerprint = in.createByteArray();
     }
 
@@ -50,7 +50,7 @@ public class Fingerprint implements Parcelable {
     public String toString() {
         return "Fingerprint{" +
                 "bid='" + bid + '\'' +
-                ", fingerType='" + fingerType + '\'' +
+                ", finger_type='" + finger_type + '\'' +
                 ", fingerprint=" + Arrays.toString(fingerprint) +
                 '}';
     }

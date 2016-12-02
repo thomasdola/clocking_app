@@ -6,6 +6,7 @@ import android.content.SharedPreferences;
 import android.util.Log;
 
 import com.eurekacachet.clocling.injection.context.ApplicationContext;
+import com.eurekacachet.clocling.utils.Constants;
 
 import javax.inject.Inject;
 
@@ -19,12 +20,12 @@ public class PreferencesHelper {
     public static final String KEY_ACCESS_TOKEN = "token";
     private static final String KEY_IS_LOGIN = "is_login";
     private static final String KEY_USER_UUID = "user_uuid";
-    private static final String KEY_THUMB_RIGHT_PATH = "thumb_right";
-    private static final String KEY_THUMB_LEFT_PATH = "thumb_left";
-    private static final String KEY_INDEX_RIGHT_PATH = "index_right";
-    private static final String KEY_INDEX_LEFT_PATH = "index_left";
-    private static final String KEY_PORTRAIT_PATH = "portrait";
-    private static final String KEY_FORM_PATH = "form";
+    private static final String KEY_THUMB_RIGHT_PATH = Constants.THUMB_RIGHT;
+    private static final String KEY_THUMB_LEFT_PATH = Constants.THUMB_LEFT;
+    private static final String KEY_INDEX_RIGHT_PATH = Constants.INDEX_RIGHT;
+    private static final String KEY_INDEX_LEFT_PATH = Constants.INDEX_LEFT;
+    private static final String KEY_PORTRAIT_PATH = Constants.PORTRAIT;
+    private static final String KEY_FORM_PATH = Constants.FORM;
     private static final String KEY_DEVICE_ID = "device_id";
 
     private final SharedPreferences mPreferences;
@@ -51,11 +52,9 @@ public class PreferencesHelper {
                 .apply();
     }
 
-    public Observable<Boolean> getLogin(){
+    public boolean getLogin(){
         Log.d("MainActivityPresenter", "getLogin");
-        return Observable.just(
-                mPreferences.getBoolean(KEY_IS_LOGIN, false)
-        );
+        return mPreferences.getBoolean(KEY_IS_LOGIN, false);
     }
 
     public void setUserUUID(String userUUID) {
@@ -76,61 +75,12 @@ public class PreferencesHelper {
         return Observable.just(mPreferences.getString(KEY_DEVICE_ID, null));
     }
 
-    public void setThumbRight(String saved){
-        mPreferences.edit().putString(KEY_THUMB_RIGHT_PATH, saved)
+    public void setPath(String KEY_PATH, String path){
+        mPreferences.edit().putString(KEY_PATH, path)
                 .apply();
     }
 
-//    public Observable<String> getThumbRightPath(){
-//        return Observable.just(mPreferences.getString(KEY_THUMB_RIGHT_PATH, null));
-//    }
-
-    public String getThumbRightPath(){
-        return mPreferences.getString(KEY_THUMB_RIGHT_PATH, null);
-    }
-
-    public void setThumbLeft(String saved){
-        mPreferences.edit().putString(KEY_THUMB_LEFT_PATH, saved)
-                .apply();
-    }
-
-    public String getThumbLeftPath(){
-        return mPreferences.getString(KEY_THUMB_LEFT_PATH, null);
-    }
-
-    public void setIndexRight(String saved){
-        mPreferences.edit().putString(KEY_INDEX_RIGHT_PATH, saved)
-                .apply();
-    }
-
-    public String getIndexRightPath(){
-        return mPreferences.getString(KEY_INDEX_RIGHT_PATH, null);
-    }
-
-    public void setIndexLeft(String saved){
-        mPreferences.edit().putString(KEY_INDEX_LEFT_PATH, saved)
-                .apply();
-    }
-
-    public String getIndexLeftPath(){
-        return mPreferences.getString(KEY_INDEX_LEFT_PATH, null);
-    }
-
-    public void setPortrait(String saved){
-        mPreferences.edit().putString(KEY_PORTRAIT_PATH, saved)
-                .apply();
-    }
-
-    public String getPortraitPath(){
-        return mPreferences.getString(KEY_PORTRAIT_PATH, null);
-    }
-
-    public void setForm(String saved){
-        mPreferences.edit().putString(KEY_FORM_PATH, saved)
-                .apply();
-    }
-
-    public String getFormPath(){
-        return mPreferences.getString(KEY_FORM_PATH, null);
+    public String getPath(String KEY_PATH){
+        return mPreferences.getString(KEY_PATH, null);
     }
 }

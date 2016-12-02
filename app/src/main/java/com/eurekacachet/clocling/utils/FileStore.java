@@ -19,14 +19,29 @@ public class FileStore {
 
     public File save(Bitmap bitmap, String filename){
         try{
-            ByteArrayOutputStream stream = new ByteArrayOutputStream();
-            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, stream);
             FileOutputStream outputStream = mContext.openFileOutput(filename, Context.MODE_PRIVATE);
-            outputStream.write(stream.toByteArray());
+            outputStream.write(bitmapToByteArray(bitmap));
             outputStream.close();
         } catch (IOException e){
             e.printStackTrace();
         }
         return new File(mContext.getFilesDir(), filename);
+    }
+
+    public File save(byte[] bytes, String filename){
+        try{
+            FileOutputStream outputStream = mContext.openFileOutput(filename, Context.MODE_PRIVATE);
+            outputStream.write(bytes);
+            outputStream.close();
+        } catch (IOException e){
+            e.printStackTrace();
+        }
+        return new File(mContext.getFilesDir(), filename);
+    }
+
+    public byte[] bitmapToByteArray(Bitmap bitmap){
+        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, stream);
+        return stream.toByteArray();
     }
 }

@@ -1,12 +1,16 @@
 package com.eurekacachet.clocling.ui.view.bio;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.Toast;
 
 import com.credenceid.biometrics.Biometrics;
 import com.credenceid.biometrics.BiometricsManager;
+import com.eurekacachet.clocling.ClockingApplication;
 import com.eurekacachet.clocling.R;
 import com.eurekacachet.clocling.ui.base.BaseActivity;
 import com.eurekacachet.clocling.ui.view.bio.pages.FacePage;
@@ -15,9 +19,11 @@ import com.eurekacachet.clocling.ui.view.bio.pages.IndexLeftPage;
 import com.eurekacachet.clocling.ui.view.bio.pages.IndexRightPage;
 import com.eurekacachet.clocling.ui.view.bio.pages.ThumbLeftPage;
 import com.eurekacachet.clocling.ui.view.bio.pages.ThumbRightPage;
+import com.eurekacachet.clocling.utils.Constants;
 
 import javax.inject.Inject;
 
+import io.socket.client.Socket;
 import me.panavtec.wizard.Wizard;
 import me.panavtec.wizard.WizardListener;
 import me.panavtec.wizard.WizardPage;
@@ -25,19 +31,46 @@ import me.panavtec.wizard.WizardPageListener;
 
 public class BioActivity extends BaseActivity implements WizardPageListener, WizardListener, BioMvpView {
 
+    private static final String BID_EXTRA = "bid";
+    private static final String USER_UUID_EXTRA = "user_uuid";
     @Inject BioPresenter presenter;
     private Wizard wizard;
     BiometricsManager mBiometricsManager;
+    String mBID;
+    String mUserUUID;
+    Boolean mFirstTime;
+    private Socket mEnrolmentSocket;
+
+
+    public static Intent startNewIntent(Context context, String userUUID, String bid){
+        Intent intent = new Intent(context, BioActivity.class);
+        intent.putExtra(BID_EXTRA, bid);
+        intent.putExtra(USER_UUID_EXTRA, userUUID);
+        return intent;
+    }
+
+    private BroadcastReceiver cancelCaptureBroadcastReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            finish();
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         getActivityComponent().inject(this);
+        mFirstTime = true;
+        mBID = getIntent().getStringExtra(BID_EXTRA).replace("\"", "");
+        mUserUUID = getIntent().getStringExtra(USER_UUID_EXTRA);
         setContentView(R.layout.activity_bio);
+        mEnrolmentSocket = ((ClockingApplication) getApplication())
+                .getEnrolmentSocket().connect();
         mBiometricsManager = new BiometricsManager(this);
         initView();
-        initWizard();
         presenter.attachView(this);
+        initWizard();
+        registerReceiver(cancelCaptureBroadcastReceiver, new IntentFilter(Constants.CANCEL_CAPTURE));
     }
 
     @Override
@@ -61,7 +94,16 @@ public class BioActivity extends BaseActivity implements WizardPageListener, Wiz
     protected void onDestroy() {
         mBiometricsManager.finalizeBiometrics(false);
         super.onDestroy();
+        unregisterReceiver(cancelCaptureBroadcastReceiver);
         presenter.detachView();
+    }
+
+    public Boolean getFirstTime(){
+        return mFirstTime;
+    }
+
+    public void setFirstTime(Boolean v){
+        mFirstTime = true;
     }
 
     private void initWizard() {
@@ -88,6 +130,10 @@ public class BioActivity extends BaseActivity implements WizardPageListener, Wiz
         return wizard;
     }
 
+    public Socket getEnrolmentSocket(){
+        return mEnrolmentSocket;
+    }
+
     public BiometricsManager getBiometricsManager(){
         return mBiometricsManager;
     }
@@ -108,11 +154,19 @@ public class BioActivity extends BaseActivity implements WizardPageListener, Wiz
 
     @Override
     public void onPageChanged(int currentPageIndex, WizardPage page) {
-//        Toast.makeText(this, "Page selected: " + currentPageIndex, Toast.LENGTH_SHORT).show();
+        mFirstTime = false;
     }
 
     @Override
     public void onBackPressed() {
 
+    }
+
+    public String getBid() {
+        return mBID;
+    }
+
+    public String getUserUUID() {
+        return mUserUUID;
     }
 }

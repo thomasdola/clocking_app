@@ -16,7 +16,9 @@ import android.widget.Toast;
 
 import com.eurekacachet.clocling.R;
 import com.eurekacachet.clocling.ui.base.BaseActivity;
+import com.eurekacachet.clocling.ui.view.login.LoginActivity;
 import com.eurekacachet.clocling.ui.view.main.MainActivity;
+import com.eurekacachet.clocling.utils.services.SocketService;
 
 import java.util.HashMap;
 
@@ -123,10 +125,17 @@ public class LoginFragment extends DialogFragment implements LoginFragmentMvpVie
         Intent intent = new Intent(getActivity(), MainActivity.class);
         getDialog().dismiss();
         startActivity(intent);
+        getActivity().finish();
     }
 
     @Override
     public void onSignInFailed(String reason) {
         Toast.makeText(getActivity(), reason, Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void startSocketService() {
+        getActivity()
+                .startService(new Intent(getActivity(), SocketService.class));
     }
 }

@@ -1,7 +1,10 @@
 package com.eurekacachet.clocling.ui.view.bio.fragments.index_right;
 
+import android.util.Log;
+
 import com.eurekacachet.clocling.data.DataManager;
 import com.eurekacachet.clocling.ui.base.BasePresenter;
+import com.eurekacachet.clocling.utils.Constants;
 
 import javax.inject.Inject;
 
@@ -31,11 +34,13 @@ public class IndexRightPresenter extends BasePresenter<IndexRightFragment> {
 
     public void currentIndexRight(){
         checkViewAttached();
-        getMvpView().setCurrentIndexRightPath(mDataManager.getIndexRightPath());
+        getMvpView().setCurrentIndexRightPath(mDataManager.getPath(Constants.INDEX_RIGHT));
     }
 
-    public void setCurrentIndexRightPath(String path){
+    public void setCurrentIndexRight(String path, String fmdPath){
         checkViewAttached();
-        mDataManager.setIndexRight(path);
+        mDataManager.setPath(Constants.INDEX_RIGHT, path);
+        mDataManager.setPath(Constants.INDEX_RIGHT_FMD, fmdPath);
+        Log.d(getClass().getSimpleName(), fmdPath);
     }
 }

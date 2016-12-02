@@ -64,7 +64,13 @@ public class ClockingActivity extends BaseActivity implements ClockingMvpView {
                 if(status != null) headerView.setText(status);
                 if(bitmap != null){
                     fingerView.setImageBitmap(bitmap);
-                    presenter.matchFinger(bitmap, mBiometricsManager);
+                    mBiometricsManager.convertToFmd(bitmap, Biometrics.FmdFormat.ANSI_378_2004,
+                            new Biometrics.OnConvertToFmdListener() {
+                        @Override
+                        public void onConvertToFmd(Biometrics.ResultCode resultCode, byte[] fmd) {
+                            presenter.matchFinger(fmd, mBiometricsManager);
+                        }
+                    });
                 }
             }
 

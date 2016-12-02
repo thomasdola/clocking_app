@@ -15,6 +15,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.credenceid.biometrics.Biometrics;
+import com.credenceid.biometrics.BiometricsManager;
 import com.eurekacachet.clocling.R;
 import com.eurekacachet.clocling.ui.base.BaseActivity;
 import com.eurekacachet.clocling.ui.view.bio.BioActivity;
@@ -38,6 +39,9 @@ public class ThumbLeftFragment extends Fragment implements ThumbLeftMvpView {
     String mThumbLeft;
 
     @Inject ThumbLeftPresenter presenter;
+    private BiometricsManager mBiometricsManager;
+    private FileStore mFileStore;
+    private Bitmap mThumbLeftBitmap;
 
     public ThumbLeftFragment() {
         // Required empty public constructor
@@ -91,16 +95,26 @@ public class ThumbLeftFragment extends Fragment implements ThumbLeftMvpView {
                 headerView.setText(R.string.loading_text);
                 fingerView.setImageDrawable(null);
 
-                ((BioActivity) getActivity())
-                        .getBiometricsManager()
+                mBiometricsManager = ((BioActivity) getActivity())
+                        .getBiometricsManager();
+                mBiometricsManager
                         .grabFingerprint(Biometrics.ScanType.SINGLE_FINGER, new Biometrics.OnFingerprintGrabbedListener() {
                             @Override
                             public void onFingerprintGrabbed(Biometrics.ResultCode resultCode, Bitmap bitmap, byte[] bytes, String filePath, String status) {
                                 if(status != null) headerView.setText(status);
                                 if(bitmap != null) {
                                     fingerView.setImageBitmap(bitmap);
-                                    presenter.setCurrentThumbLeftPath((new FileStore(getContext()))
-                                            .save(bitmap, Constants.THUMB_LEFT).getAbsolutePath());
+                                    mThumbLeftBitmap = bitmap;
+                                    mFileStore = new FileStore(getContext());
+                                    mBiometricsManager.convertToFmd(mThumbLeftBitmap, Biometrics.FmdFormat.ANSI_378_2004, new Biometrics.OnConvertToFmdListener() {
+                                        @Override
+                                        public void onConvertToFmd(Biometrics.ResultCode resultCode, byte[] fmd) {
+                                            presenter.setCurrentThumbLeft(
+                                                    mFileStore.save(mThumbLeftBitmap, Constants.THUMB_LEFT).getAbsolutePath(),
+                                                    mFileStore.save(fmd, Constants.THUMB_LEFT_FMD).getAbsolutePath()
+                                            );
+                                        }
+                                    });
                                 }
                             }
 
@@ -137,7 +151,7 @@ public class ThumbLeftFragment extends Fragment implements ThumbLeftMvpView {
 
     @Override
     public void setCurrentThumbLeftPath(String path) {
-        Log.d(this.getClass().getSimpleName(), String.format("setCurrentThumbLeftPath with -> %s", path));
+        Log.d(this.getClass().getSimpleName(), String.format("setCurrentThumbLeft with -> %s", path));
         mThumbLeft = path;
     }
 }

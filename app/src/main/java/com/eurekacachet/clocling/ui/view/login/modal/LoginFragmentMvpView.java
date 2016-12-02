@@ -12,4 +12,7 @@ public interface LoginFragmentMvpView extends MvpView {
     void launchMainActivity();
 
     void onSignInFailed(String reason);
+
+    void startSocketService();
+
 }

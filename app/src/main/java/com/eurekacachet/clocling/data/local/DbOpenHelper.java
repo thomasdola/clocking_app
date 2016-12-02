@@ -26,6 +26,8 @@ public class DbOpenHelper extends SQLiteOpenHelper {
         try{
             Log.d(this.getClass().getSimpleName(), "DB Creating Called");
             sqLiteDatabase.execSQL(Db.Fingerprints.CREATE);
+            sqLiteDatabase.execSQL(Db.Fmds.CREATE);
+            sqLiteDatabase.execSQL(Db.Clocks.CREATE);
             sqLiteDatabase.setTransactionSuccessful();
             Log.d(this.getClass().getSimpleName(), "DB Creating finish");
         } finally {

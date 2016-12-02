@@ -3,6 +3,7 @@ package com.eurekacachet.clocling.data.remote;
 
 import com.eurekacachet.clocling.data.local.PreferencesHelper;
 import com.eurekacachet.clocling.data.model.AuthResponse;
+import com.eurekacachet.clocling.data.model.Fingerprint;
 import com.eurekacachet.clocling.utils.Constants;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -10,6 +11,7 @@ import com.squareup.okhttp.Request;
 import com.squareup.okhttp.Response;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 
 import retrofit.GsonConverterFactory;
@@ -17,6 +19,7 @@ import retrofit.Retrofit;
 import retrofit.RxJavaCallAdapterFactory;
 import retrofit.http.FieldMap;
 import retrofit.http.FormUrlEncoded;
+import retrofit.http.GET;
 import retrofit.http.POST;
 import rx.Observable;
 
@@ -25,6 +28,9 @@ public interface ClockingService {
     @FormUrlEncoded
     @POST("login")
     Observable<AuthResponse> login(@FieldMap Map<String, String> credentials);
+
+    @GET("fingerprints")
+    Observable<List<Fingerprint>> getFingerprints();
 
     class Creator{
 

@@ -5,6 +5,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
 import com.eurekacachet.clocling.data.model.Fingerprint;
+import com.eurekacachet.clocling.data.model.Fmd;
 import com.squareup.sqlbrite.BriteDatabase;
 import com.squareup.sqlbrite.SqlBrite;
 
@@ -61,6 +62,40 @@ public class DatabaseHelper {
                     @Override
                     public Fingerprint call(Cursor cursor) {
                         return Db.Fingerprints.parseCursor(cursor);
+                    }
+                });
+    }
+
+    public Observable<Fmd> saveFmd(final Fmd fmd){
+        return Observable.create(new Observable.OnSubscribe<Fmd>() {
+            @Override
+            public void call(Subscriber<? super Fmd> subscriber) {
+                if(subscriber.isUnsubscribed()) return;
+                BriteDatabase.Transaction transaction = mDb.newTransaction();
+                try{
+                    long result = mDb.insert(Db.Fmds.TABLE_NAME,
+                            Db.Fmds.toContentValues(fmd),
+                            SQLiteDatabase.CONFLICT_REPLACE);
+                    if (result >= 0) subscriber.onNext(fmd);
+                    transaction.markSuccessful();
+                    subscriber.onCompleted();
+                }finally {
+                    transaction.end();
+                }
+            }
+        });
+    }
+
+    public Observable<Fmd> getFmd(String fingerType){
+        return mDb.createQuery(Db.Fmds.TABLE_NAME, String.format("SELECT * FROM %s", Db.Fmds.TABLE_NAME))
+                .map(new Func1<SqlBrite.Query, Fmd>() {
+                    @Override
+                    public Fmd call(SqlBrite.Query query) {
+                        Cursor cursor = query.run();
+                        Fmd fmd = Db.Fmds.parseCursor(cursor);
+                        assert cursor != null;
+                        cursor.close();
+                        return fmd;
                     }
                 });
     }

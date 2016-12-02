@@ -1,6 +1,7 @@
 package com.eurekacachet.clocling.ui.view.bio.fragments.form;
 
 
+import android.app.ProgressDialog;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.ImageFormat;
@@ -16,7 +17,10 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
 
+import com.credenceid.biometrics.Biometrics;
+import com.credenceid.biometrics.BiometricsManager;
 import com.eurekacachet.clocling.R;
+import com.eurekacachet.clocling.data.model.Bio;
 import com.eurekacachet.clocling.ui.base.BaseActivity;
 import com.eurekacachet.clocling.ui.view.bio.BioActivity;
 import com.eurekacachet.clocling.utils.Constants;
@@ -26,10 +30,17 @@ import com.ragnarok.rxcamera.RxCameraData;
 import com.ragnarok.rxcamera.config.RxCameraConfig;
 import com.ragnarok.rxcamera.request.Func;
 
+import org.json.JSONObject;
+
 import java.io.File;
+import java.util.Arrays;
+import java.util.List;
 
 import javax.inject.Inject;
 
+import io.socket.client.Ack;
+import io.socket.client.Socket;
+import io.socket.emitter.Emitter;
 import rx.Observable;
 import rx.Subscriber;
 import rx.android.schedulers.AndroidSchedulers;
@@ -53,8 +64,14 @@ public class FormPictureFragment extends Fragment implements FormPictureMvpView 
     RxCamera mCamera;
     SurfaceView pictureView;
     String mForm;
+    FileStore mFileStore;
 
     @Inject FormPicturePresenter presenter;
+    BiometricsManager mBiometricManager;
+    Socket mEnrolmentSocket;
+    private ProgressDialog mProgressDialog;
+    private String mUserUUID;
+    private String mBid;
 
     public FormPictureFragment() {
         // Required empty public constructor
@@ -77,9 +94,25 @@ public class FormPictureFragment extends Fragment implements FormPictureMvpView 
     }
 
     @Override
+    public void enableReview() {
+        reviewButton.setEnabled(true);
+    }
+
+    @Override
+    public void disableReview() {
+        reviewButton.setEnabled(false);
+    }
+
+    @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         ((BaseActivity) getActivity()).getActivityComponent().inject(this);
+        mFileStore = new FileStore(getContext());
+        mBiometricManager = ((BioActivity) getActivity()).getBiometricsManager();
+        mEnrolmentSocket = ((BioActivity) getActivity()).getEnrolmentSocket();
+        mUserUUID = ((BioActivity) getActivity()).getUserUUID();
+        mBid = ((BioActivity)getActivity()).getBid();
+        mEnrolmentSocket.on(Constants.makeEvent(mUserUUID, Constants.EDIT_CAPTURE), onEditBioData);
         presenter.attachView(this);
     }
 
@@ -127,7 +160,7 @@ public class FormPictureFragment extends Fragment implements FormPictureMvpView 
         reviewButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
+                presenter.readyToReview();
             }
         });
     }
@@ -208,7 +241,9 @@ public class FormPictureFragment extends Fragment implements FormPictureMvpView 
     @Override
     public void onDestroy() {
         super.onDestroy();
+        presenter.detachView();
         stopCamera();
+        mEnrolmentSocket.on(Constants.makeEvent(mUserUUID, Constants.EDIT_CAPTURE), onEditBioData);
     }
 
     @Override
@@ -281,7 +316,84 @@ public class FormPictureFragment extends Fragment implements FormPictureMvpView 
     }
 
     @Override
+    public void showLoading() {
+        showReviewing();
+    }
+
+    private void showReviewing() {
+        mProgressDialog = new ProgressDialog(getContext());
+        mProgressDialog.setMessage(getString(R.string.reviewing_text));
+        mProgressDialog.setCancelable(false);
+        mProgressDialog.setCanceledOnTouchOutside(false);
+        mProgressDialog.show();
+    }
+
+    @Override
+    public void hideLoading() {
+        hideReviewing();
+    }
+
+    private void hideReviewing() {
+        if(mProgressDialog != null){
+            if(mProgressDialog.isShowing()){
+                mProgressDialog.dismiss();
+            }
+            mProgressDialog = null;
+        }
+    }
+
+    @Override
+    public void convertToFmd(List<Bio> bios) {
+        for (final Bio bio : bios){
+            Bitmap bitmap = BitmapFactory.decodeByteArray(bio.getFile(), 0, bio.getFile().length);
+            mBiometricManager.convertToFmd(bitmap, Biometrics.FmdFormat.ANSI_378_2004, new Biometrics.OnConvertToFmdListener() {
+                @Override
+                public void onConvertToFmd(Biometrics.ResultCode resultCode, byte[] bytes) {
+                    bio.setFmd(bytes);
+                    Log.d(getClass().getSimpleName(), String.format("%s -> %s", bio.getType(), Arrays.toString(bytes)));
+                }
+            });
+        }
+        presenter.send(bios);
+    }
+
+    @Override
+    public void sendForReview(JSONObject object) {
+        JSONObject payload = new JSONObject();
+        try{
+            payload.put("channel",
+                    Constants.makeEvent(
+                            mUserUUID,
+                            Constants.REVIEW_BIO_DATA
+                    ));
+            payload.put("data", object);
+
+            mEnrolmentSocket.emit(Constants.ENROLMENT, payload, new Ack() {
+                @Override
+                public void call(Object... args) {
+                    Log.d(getClass().getSimpleName(), "done sending bio data");
+                }
+            });
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void onReview(){
+        presenter.getBioData(((BioActivity)getActivity()).getBid());
+    }
+
+    @Override
     public void setCurrentFormPicturePath(String path) {
         mForm = path;
     }
+
+    private Emitter.Listener onEditBioData = new Emitter.Listener() {
+        @Override
+        public void call(Object... args) {
+            presenter.editBioData();
+        }
+    };
+
 }

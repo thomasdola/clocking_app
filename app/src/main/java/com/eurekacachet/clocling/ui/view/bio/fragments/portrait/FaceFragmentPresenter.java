@@ -2,6 +2,7 @@ package com.eurekacachet.clocling.ui.view.bio.fragments.portrait;
 
 import com.eurekacachet.clocling.data.DataManager;
 import com.eurekacachet.clocling.ui.base.BasePresenter;
+import com.eurekacachet.clocling.utils.Constants;
 
 import javax.inject.Inject;
 
@@ -34,10 +35,10 @@ public class FaceFragmentPresenter extends BasePresenter<FaceFragment> {
 
     public void loadCurrentPortraitPath(){
         checkViewAttached();
-        getMvpView().setCurrentPortraitPath(mDataManager.getPortraitPath());
+        getMvpView().setCurrentPortraitPath(mDataManager.getPath(Constants.PORTRAIT));
     }
 
     public void setCurrentPortraitPath(String path){
-        mDataManager.setPortrait(path);
+        mDataManager.setPath(Constants.PORTRAIT, path);
     }
 }

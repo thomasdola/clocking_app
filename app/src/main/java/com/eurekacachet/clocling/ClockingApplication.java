@@ -2,20 +2,20 @@ package com.eurekacachet.clocling;
 
 import android.app.Application;
 import android.content.Context;
-import android.telephony.TelephonyManager;
+import android.content.Intent;
 
-import com.eurekacachet.clocling.data.local.PreferencesHelper;
 import com.eurekacachet.clocling.data.remote.ClockingService;
 import com.eurekacachet.clocling.injection.component.ApplicationComponent;
 import com.eurekacachet.clocling.injection.component.DaggerApplicationComponent;
 import com.eurekacachet.clocling.injection.module.ApplicationModule;
 import com.eurekacachet.clocling.utils.Constants;
+import com.eurekacachet.clocling.utils.services.SocketService;
 
-import java.net.URISyntaxException;
+import java.net.URI;
 
 import javax.inject.Inject;
 
-import io.socket.client.IO;
+import io.socket.client.Manager;
 import io.socket.client.Socket;
 
 public class ClockingApplication extends Application{
@@ -25,20 +25,28 @@ public class ClockingApplication extends Application{
 
     public static ClockingApplication sClockingApplication;
 
-    private Socket mSocket;
+    private final Socket mDefaultSocket;
+
+    private final Socket mEnrolmentSocket;
+
     {
-        try{
-            mSocket = IO.socket(Constants.SOCKET_URL);
-        }catch (URISyntaxException e) {
-            throw new RuntimeException(e);
-        }
+        Manager mSocketManager = new Manager(URI.create(Constants.SOCKET_URL));
+        mDefaultSocket = mSocketManager.socket("/");
+        mEnrolmentSocket = mSocketManager.socket("/enrolment");
+    }
+
+    public Socket getDefaultSocket(){
+        return mDefaultSocket;
+    }
+
+    public Socket getEnrolmentSocket(){
+        return mEnrolmentSocket;
     }
 
     @Override
     public void onCreate() {
         super.onCreate();
         sClockingApplication = this;
-        mSocket.connect();
     }
 
     public static ClockingApplication get(Context context){
@@ -57,10 +65,6 @@ public class ClockingApplication extends Application{
 
     public void setComponent(ApplicationComponent applicationComponent){
         mApplicationComponent = applicationComponent;
-    }
-
-    public Socket getSocket(){
-        return mSocket;
     }
 
     public static ClockingApplication getApplication(){
