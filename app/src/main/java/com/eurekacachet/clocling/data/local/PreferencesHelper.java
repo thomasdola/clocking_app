@@ -20,13 +20,9 @@ public class PreferencesHelper {
     public static final String KEY_ACCESS_TOKEN = "token";
     private static final String KEY_IS_LOGIN = "is_login";
     private static final String KEY_USER_UUID = "user_uuid";
-    private static final String KEY_THUMB_RIGHT_PATH = Constants.THUMB_RIGHT;
-    private static final String KEY_THUMB_LEFT_PATH = Constants.THUMB_LEFT;
-    private static final String KEY_INDEX_RIGHT_PATH = Constants.INDEX_RIGHT;
-    private static final String KEY_INDEX_LEFT_PATH = Constants.INDEX_LEFT;
-    private static final String KEY_PORTRAIT_PATH = Constants.PORTRAIT;
-    private static final String KEY_FORM_PATH = Constants.FORM;
+    private static final String KEY_LOG_UUID = "log_uuid";
     private static final String KEY_DEVICE_ID = "device_id";
+    private static final String KEY_CONNECTION_ID = "connId";
 
     private final SharedPreferences mPreferences;
 
@@ -66,6 +62,15 @@ public class PreferencesHelper {
         return Observable.just(mPreferences.getString(KEY_USER_UUID, null));
     }
 
+    public void setLogUUID(String logUUID) {
+        mPreferences.edit().putString(KEY_LOG_UUID, logUUID)
+                .apply();
+    }
+
+    public Observable<String> getLogUUID(){
+        return Observable.just(mPreferences.getString(KEY_LOG_UUID, null));
+    }
+
     public void setDeviceId(String deviceId) {
         mPreferences.edit().putString(KEY_DEVICE_ID, deviceId)
                 .apply();
@@ -82,5 +87,14 @@ public class PreferencesHelper {
 
     public String getPath(String KEY_PATH){
         return mPreferences.getString(KEY_PATH, null);
+    }
+
+    public String getConnectionId() {
+        return mPreferences.getString(KEY_CONNECTION_ID, null);
+    }
+
+    public void setConnectionId(String connId){
+        mPreferences.edit().putString(KEY_CONNECTION_ID, connId)
+                .apply();
     }
 }

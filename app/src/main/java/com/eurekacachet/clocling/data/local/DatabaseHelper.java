@@ -3,13 +3,17 @@ package com.eurekacachet.clocling.data.local;
 
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.util.Log;
 
+import com.eurekacachet.clocling.data.model.Clock;
+import com.eurekacachet.clocling.data.model.FingerFmd;
 import com.eurekacachet.clocling.data.model.Fingerprint;
 import com.eurekacachet.clocling.data.model.Fmd;
 import com.squareup.sqlbrite.BriteDatabase;
 import com.squareup.sqlbrite.SqlBrite;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -32,7 +36,11 @@ public class DatabaseHelper {
         return mDb;
     }
 
+
+
     public Observable<Fingerprint> saveFingerprints(final Collection<Fingerprint> fingerprints){
+        Log.d(getClass().getSimpleName(),
+                String.format("saveFingerprints called with -> %s", fingerprints));
         return Observable.create(new Observable.OnSubscribe<Fingerprint>() {
             @Override
             public void call(Subscriber<? super Fingerprint> subscriber) {
@@ -41,6 +49,7 @@ public class DatabaseHelper {
                 try{
                     mDb.delete(Db.Fingerprints.TABLE_NAME, null);
                     for (Fingerprint fingerprint : fingerprints) {
+                        Log.d(getClass().getSimpleName(), String.format("finger -> %s", fingerprint));
                         long result = mDb.insert(Db.Fingerprints.TABLE_NAME,
                                 Db.Fingerprints.toContentValues(fingerprint),
                                 SQLiteDatabase.CONFLICT_REPLACE);
@@ -55,12 +64,23 @@ public class DatabaseHelper {
         });
     }
 
-    public Observable<List<Fingerprint>> getFingerprints(){
+    public Observable<List<Clock>> getClocks(){
+        return mDb.createQuery(Db.Clocks.TABLE_NAME,
+                "SELECT * FROM " + Db.Clocks.TABLE_NAME)
+                .mapToList(new Func1<Cursor, Clock>() {
+                    @Override
+                    public Clock call(Cursor cursor) {
+                        return Db.Clocks.parseCursor(cursor);
+                    }
+                });
+    }
+
+    public Observable<List<FingerFmd>> getFingerprints(){
         return mDb.createQuery(Db.Fingerprints.TABLE_NAME,
                 "SELECT * FROM " + Db.Fingerprints.TABLE_NAME)
-                .mapToList(new Func1<Cursor, Fingerprint>() {
+                .mapToList(new Func1<Cursor, FingerFmd>() {
                     @Override
-                    public Fingerprint call(Cursor cursor) {
+                    public FingerFmd call(Cursor cursor) {
                         return Db.Fingerprints.parseCursor(cursor);
                     }
                 });
@@ -98,5 +118,25 @@ public class DatabaseHelper {
                         return fmd;
                     }
                 });
+    }
+
+    public Observable<Clock> saveClock(final Clock clock) {
+        return Observable.create(new Observable.OnSubscribe<Clock>() {
+            @Override
+            public void call(Subscriber<? super Clock> subscriber) {
+                if(subscriber.isUnsubscribed()) return;
+                BriteDatabase.Transaction transaction = mDb.newTransaction();
+                try{
+                    long result = mDb.insert(Db.Clocks.TABLE_NAME,
+                            Db.Clocks.toContentValues(clock),
+                            SQLiteDatabase.CONFLICT_REPLACE);
+                    if (result >= 0) subscriber.onNext(clock);
+                    transaction.markSuccessful();
+                    subscriber.onCompleted();
+                } finally {
+                    transaction.end();
+                }
+            }
+        });
     }
 }

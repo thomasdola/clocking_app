@@ -10,6 +10,7 @@ import android.util.Log;
 
 import com.eurekacachet.clocling.ClockingApplication;
 import com.eurekacachet.clocling.data.DataManager;
+import com.eurekacachet.clocling.data.model.ActionResponse;
 import com.eurekacachet.clocling.data.model.Fingerprint;
 import com.eurekacachet.clocling.utils.AndroidComponentUtil;
 import com.eurekacachet.clocling.utils.NetworkUtil;
@@ -69,6 +70,24 @@ public class SyncService extends Service {
 
                     @Override
                     public void onNext(Fingerprint fingerprint) {}
+                });
+
+        mSubscription = mDataManager.syncClocks()
+                .subscribeOn(Schedulers.io())
+                .subscribe(new Subscriber<ActionResponse>() {
+                    @Override
+                    public void onCompleted() {
+                        stopSelf(startId);
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        e.printStackTrace();
+                        stopSelf(startId);
+                    }
+
+                    @Override
+                    public void onNext(ActionResponse actionResponse) {}
                 });
 
         return START_STICKY;

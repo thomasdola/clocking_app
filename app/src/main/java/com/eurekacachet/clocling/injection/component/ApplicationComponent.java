@@ -10,6 +10,7 @@ import com.eurekacachet.clocling.data.remote.ClockingService;
 import com.eurekacachet.clocling.injection.context.ApplicationContext;
 import com.eurekacachet.clocling.injection.module.ApplicationModule;
 import com.eurekacachet.clocling.utils.RxEventBus;
+import com.eurekacachet.clocling.utils.services.SocketOffService;
 import com.eurekacachet.clocling.utils.services.SocketService;
 import com.eurekacachet.clocling.utils.services.SyncService;
 
@@ -38,4 +39,6 @@ public interface ApplicationComponent {
     void inject(SyncService syncService);
 
     void inject(SocketService socketService);
+
+    void inject(SocketOffService socketOffService);
 }

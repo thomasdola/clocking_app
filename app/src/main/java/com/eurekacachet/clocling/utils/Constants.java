@@ -19,6 +19,12 @@ public class Constants {
     public static final String CAPTURE_BIO_DATA = "CaptureBioData";
     public static final String REVIEW_BIO_DATA = "ReviewBioData";
     public static final String EDIT_CAPTURE = "EditBioData";
+    public static final String DEVICES = "DEVICES";
+    public static final String DEVICE_CONNECTED = "Device:Connected";
+    public static final String DEVICE_DISCONNECTED = "Device:Disconnected";
+    public static final String CREDENCE = "CREDENCE";
+    public static final String FINGERPRINTS_UPDATED = "FINGERPRINTS:UPDATED";
+    public static final String BATCH = "batch";
     public static String SOCKET_URL = "http://192.168.1.136:6001";
     public static String SERVER_URL = "http://192.168.1.136/device-api/";
 

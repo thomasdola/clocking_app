@@ -91,7 +91,7 @@ public class MainActivity extends BaseActivity implements HomeMvpView {
     }
 
     private void launchClockingActivity() {
-        startActivity(new Intent(this, ClockingActivity.class));
+        startActivity(ClockingActivity.startNewIntent(this));
     }
 
     @Override

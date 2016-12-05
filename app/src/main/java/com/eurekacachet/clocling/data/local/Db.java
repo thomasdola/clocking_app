@@ -3,8 +3,10 @@ package com.eurekacachet.clocling.data.local;
 
 import android.content.ContentValues;
 import android.database.Cursor;
+import android.util.Base64;
 
 import com.eurekacachet.clocling.data.model.Clock;
+import com.eurekacachet.clocling.data.model.FingerFmd;
 import com.eurekacachet.clocling.data.model.Fingerprint;
 import com.eurekacachet.clocling.data.model.Fmd;
 
@@ -33,15 +35,15 @@ public class Db {
             ContentValues values = new ContentValues();
             values.put(COLUMN_BID, fingerprint.bid);
             values.put(COLUMN_FINGER_TYPE, fingerprint.finger_type);
-            values.put(COLUMN_FINGERPRINT, fingerprint.fingerprint);
+            values.put(COLUMN_FINGERPRINT, Base64.decode(fingerprint.fingerprint, Base64.DEFAULT));
             return values;
         }
 
-        public static Fingerprint parseCursor(Cursor cursor){
-            Fingerprint fingerprint = new Fingerprint();
+        public static FingerFmd parseCursor(Cursor cursor){
+            FingerFmd fingerprint = new FingerFmd();
             fingerprint.bid = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_BID));
-            fingerprint.finger_type = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_FINGER_TYPE));
-            fingerprint.fingerprint = cursor.getBlob(cursor.getColumnIndexOrThrow(COLUMN_FINGERPRINT));
+            fingerprint.type = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_FINGER_TYPE));
+            fingerprint.fmd = cursor.getBlob(cursor.getColumnIndexOrThrow(COLUMN_FINGERPRINT));
             return fingerprint;
         }
     }
@@ -88,7 +90,7 @@ public class Db {
                 "CREATE TABLE " + TABLE_NAME + " (" +
                         COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL," +
                         COLUMN_BID + " TEXT NOT NULL," +
-                        COLUMN_TIMESTAMP + " INTEGER NOT NULL," +
+                        COLUMN_TIMESTAMP + " INTEGER NOT NULL" +
                         ");";
 
         public static ContentValues toContentValues(Clock clock){

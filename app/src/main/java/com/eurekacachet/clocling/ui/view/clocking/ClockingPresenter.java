@@ -1,20 +1,21 @@
 package com.eurekacachet.clocling.ui.view.clocking;
 
 
-import android.util.Base64;
 import android.util.Log;
 
 import com.credenceid.biometrics.Biometrics;
 import com.credenceid.biometrics.BiometricsManager;
 import com.eurekacachet.clocling.data.DataManager;
-import com.eurekacachet.clocling.data.model.Fingerprint;
+import com.eurekacachet.clocling.data.model.Beneficiary;
+import com.eurekacachet.clocling.data.model.Clock;
+import com.eurekacachet.clocling.data.model.FingerFmd;
 import com.eurekacachet.clocling.ui.base.BasePresenter;
-import com.eurekacachet.clocling.utils.Constants;
-import com.google.common.io.Files;
+import com.eurekacachet.clocling.utils.NetworkUtil;
 
-import java.io.File;
-import java.util.Arrays;
+import java.sql.Timestamp;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.inject.Inject;
 
@@ -44,91 +45,107 @@ public class ClockingPresenter extends BasePresenter<ClockingActivity> {
         }
     }
 
-    public void matchFinger(final byte[] fmd, final BiometricsManager biometricsManager){
+    public void matchFinger(final byte[] fmd, final BiometricsManager biometricsManager,
+                            final String deviceId){
         checkViewAttached();
-//        getMvpView().showLoading();
+        getMvpView().showLoading();
 
-        Log.d(getClass().getSimpleName(),
-                String.format("string of fmd -> %s", Arrays.toString(fmd)));
-
-        String encodeToString = Base64.encodeToString(fmd, Base64.DEFAULT);
-        Log.d(getClass().getSimpleName(),
-                String.format("base 64 string of fmd -> %s", encodeToString));
-
-        biometricsManager.compareFmd(fmd, Base64.decode(encodeToString, Base64.DEFAULT),
-                Biometrics.FmdFormat.ANSI_378_2004,
-                new Biometrics.OnCompareFmdListener() {
+        subscription = mDataManager.getFingerprints()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Subscriber<List<FingerFmd>>() {
                     @Override
-                    public void onCompareFmd(Biometrics.ResultCode resultCode, float v) {
-                        Log.d(getClass().getSimpleName(),
-                                String.format("comparison from same result -> %s", v));
+                    public void onCompleted() {
+
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        e.printStackTrace();
+                        getMvpView().hideLoading();
+                    }
+
+                    @Override
+                    public void onNext(List<FingerFmd> fingerFmds) {
+                        for (final FingerFmd fingerFmd : fingerFmds){
+                            biometricsManager.compareFmd(fmd, fingerFmd.fmd,
+                                    Biometrics.FmdFormat.ANSI_378_2004,
+                                    new Biometrics.OnCompareFmdListener() {
+                                        @Override
+                                        public void onCompareFmd(Biometrics.ResultCode resultCode, float score) {
+                                            if(score == 0){
+                                                Timestamp timestamp = new Timestamp(System.currentTimeMillis());
+                                                final HashMap<String, String> data = new HashMap<>();
+                                                data.put("timestamp", timestamp.toString());
+                                                data.put("bid", fingerFmd.bid);
+                                                data.put("device_id", deviceId);
+                                                persistClock(data);
+                                                Log.d(getClass().getSimpleName(), String.format("result -> %s", score));
+                                                Log.d(getClass().getSimpleName(), String.format("result -> %s", true));
+                                            }else {
+                                                getMvpView().hideLoading();
+                                            }
+                                        }
+                                    });
+                        }
                     }
                 });
-
-        String path = mDataManager.getPath(Constants.THUMB_LEFT_FMD);
-        if(path == null){
-            getMvpView().hideLoading();
-            return;
-        }
-
-        File file = new File(path);
-        if(!file.exists()){
-            getMvpView().hideLoading();
-            return;
-        }
-
-        try{
-            final byte[] local = Files.toByteArray(file);
-            biometricsManager.compareFmd(fmd, local,
-                    Biometrics.FmdFormat.ANSI_378_2004,
-                    new Biometrics.OnCompareFmdListener() {
-                        @Override
-                        public void onCompareFmd(Biometrics.ResultCode resultCode, float v) {
-                            Log.d(getClass().getSimpleName(),
-                                                    String.format("comparison result -> %s", v));
-
-//                            Log.d(getClass().getSimpleName(),
-//                                    String.format("string of fmd -> %s", Arrays.toString(local)));
-                        }
-                    });
-        }catch (Exception e){
-            e.printStackTrace();
-        }
-//        biometricsManager.compareFmd();
-//        subscription = mDataManager
-//                .getFingerprints()
-//                .subscribeOn(Schedulers.io())
-//                .observeOn(AndroidSchedulers.mainThread())
-//                .subscribe(new Subscriber<List<Fingerprint>>() {
-//                    @Override
-//                    public void onCompleted() {
-//
-//                    }
-//
-//                    @Override
-//                    public void onError(Throwable e) {
-//                        e.printStackTrace();
-//                    }
-//
-//                    @Override
-//                    public void onNext(List<Fingerprint> fingerprints) {
-//                        for(Fingerprint fingerprint : fingerprints){
-//                            biometricsManager.compareFmd(fmd, fingerprint.fingerprint,
-//                                    Biometrics.FmdFormat.ANSI_378_2004,
-//                                    new Biometrics.OnCompareFmdListener() {
-//                                        @Override
-//                                        public void onCompareFmd(Biometrics.ResultCode resultCode, float v) {
-//                                            Log.d(getClass().getSimpleName(),
-//                                                    String.format("comparison result -> %s", v));
-//                                        }
-//                                    });
-//                        }
-//                    }
-//                });
     }
 
-    public void compareFmd(byte[] fmd, BiometricsManager biometricsManager) {
-        checkViewAttached();
+    private void persistClock(final HashMap<String, String> data) {
+        if(!NetworkUtil.isNetworkConnected(getMvpView().getApplicationContext())){
+            saveLocally(data);
+        }else {
+            saveOnline(data);
+        }
+    }
 
+    private void saveOnline(final HashMap<String, String> data) {
+        subscription = mDataManager.getBeneficiaryDetails(data)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Subscriber<Beneficiary>() {
+                    @Override
+                    public void onCompleted() {
+
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        e.printStackTrace();
+                        saveLocally(data);
+                        getMvpView().hideLoading();
+                    }
+
+                    @Override
+                    public void onNext(Beneficiary beneficiary) {
+                        getMvpView().displayInfo(beneficiary);
+                        getMvpView().hideLoading();
+                    }
+                });
+    }
+
+    private void saveLocally(HashMap<String, String> data) {
+        subscription = mDataManager.saveClock(data)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Subscriber<Clock>() {
+                    @Override
+                    public void onCompleted() {
+
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        e.printStackTrace();
+                        getMvpView().hideLoading();
+                    }
+
+                    @Override
+                    public void onNext(Clock clock) {
+                        getMvpView().displayLittleInfo(clock);
+                        getMvpView().hideLoading();
+                    }
+                });
     }
 }

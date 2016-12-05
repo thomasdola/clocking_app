@@ -1,24 +1,32 @@
 package com.eurekacachet.clocling.ui.view.clocking;
 
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
+import android.support.v4.app.FragmentManager;
+import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.credenceid.biometrics.Biometrics;
 import com.credenceid.biometrics.BiometricsManager;
 import com.eurekacachet.clocling.R;
+import com.eurekacachet.clocling.data.model.Beneficiary;
+import com.eurekacachet.clocling.data.model.Clock;
 import com.eurekacachet.clocling.ui.base.BaseActivity;
+import com.eurekacachet.clocling.ui.view.clocking.modals.ResultModal;
 
 import javax.inject.Inject;
 
 public class ClockingActivity extends BaseActivity implements ClockingMvpView {
 
+    private static final String DISPLAY_CLOCK_INFO_TAG = "display_clock_info";
     TextView headerView;
     ImageView fingerView;
     Button scanButton;
@@ -26,12 +34,18 @@ public class ClockingActivity extends BaseActivity implements ClockingMvpView {
     @Inject ClockingPresenter presenter;
     BiometricsManager mBiometricsManager;
     ProgressDialog mProgressDialog;
+    private TelephonyManager mTelephonyManager;
+
+    public static Intent startNewIntent(Context context){
+        return new Intent(context, ClockingActivity.class);
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         getActivityComponent().inject(this);
         setContentView(R.layout.activity_clocking);
+        mTelephonyManager = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
         mBiometricsManager = new BiometricsManager(this);
         presenter.attachView(this);
         initView();
@@ -68,7 +82,7 @@ public class ClockingActivity extends BaseActivity implements ClockingMvpView {
                             new Biometrics.OnConvertToFmdListener() {
                         @Override
                         public void onConvertToFmd(Biometrics.ResultCode resultCode, byte[] fmd) {
-                            presenter.matchFinger(fmd, mBiometricsManager);
+                            presenter.matchFinger(fmd, mBiometricsManager, mTelephonyManager.getDeviceId());
                         }
                     });
                 }
@@ -105,6 +119,7 @@ public class ClockingActivity extends BaseActivity implements ClockingMvpView {
 
     @Override
     protected void onDestroy() {
+        this.hideLoading();
         mBiometricsManager.finalizeBiometrics(false);
         super.onDestroy();
         mBiometricsManager.cancelCapture();
@@ -122,11 +137,15 @@ public class ClockingActivity extends BaseActivity implements ClockingMvpView {
 
     @Override
     public void hideLoading() {
-        if(mProgressDialog != null){
-            if(mProgressDialog.isShowing()){
-                mProgressDialog.dismiss();
+        try{
+            if(mProgressDialog != null){
+                if(mProgressDialog.isShowing()){
+                    mProgressDialog.dismiss();
+                }
+                mProgressDialog = null;
             }
-            mProgressDialog = null;
+        }catch (Exception e){
+            e.printStackTrace();
         }
     }
 
@@ -138,11 +157,25 @@ public class ClockingActivity extends BaseActivity implements ClockingMvpView {
 
     @Override
     public void onError(String reason) {
-
+        Toast.makeText(ClockingActivity.this, "There Is No Match", Toast.LENGTH_LONG).show();
     }
 
     @Override
     public void onSuccess() {
 
+    }
+
+    @Override
+    public void displayInfo(Beneficiary beneficiary) {
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        ResultModal modal = ResultModal.newInstance(beneficiary);
+        modal.show(fragmentManager, DISPLAY_CLOCK_INFO_TAG);
+    }
+
+    @Override
+    public void displayLittleInfo(Clock clock) {
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        ResultModal modal = ResultModal.newInstance(clock);
+        modal.show(fragmentManager, DISPLAY_CLOCK_INFO_TAG);
     }
 }

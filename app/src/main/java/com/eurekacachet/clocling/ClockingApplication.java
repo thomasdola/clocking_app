@@ -73,7 +73,12 @@ public class ClockingApplication extends Application{
 
     @Override
     public void onTerminate() {
+        stopService(SocketService.getStartIntent(this));
+        if(mDefaultSocket.connected()){
+            mDefaultSocket.disconnect();
+        }
         super.onTerminate();
         sClockingApplication = null;
+
     }
 }

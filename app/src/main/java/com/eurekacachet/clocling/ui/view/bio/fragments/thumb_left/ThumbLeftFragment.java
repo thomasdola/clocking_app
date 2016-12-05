@@ -72,7 +72,7 @@ public class ThumbLeftFragment extends Fragment implements ThumbLeftMvpView {
         Log.d(this.getClass().getSimpleName(), "onResume called");
         Log.d(this.getClass().getSimpleName(), String.format("path out -> %s", mThumbLeft));
         if(mThumbLeft != null){
-            File file = new File(getContext().getFilesDir(), Constants.THUMB_LEFT);
+            File file = new File(getActivity().getFilesDir(), Constants.THUMB_LEFT);
             Log.d(this.getClass().getSimpleName(), String.format("path -> %s", mThumbLeft));
             Log.d(this.getClass().getSimpleName(), String.format("file exists? -> %s", file.exists()));
             if(file.exists()){
@@ -105,7 +105,7 @@ public class ThumbLeftFragment extends Fragment implements ThumbLeftMvpView {
                                 if(bitmap != null) {
                                     fingerView.setImageBitmap(bitmap);
                                     mThumbLeftBitmap = bitmap;
-                                    mFileStore = new FileStore(getContext());
+                                    mFileStore = new FileStore(getActivity());
                                     mBiometricsManager.convertToFmd(mThumbLeftBitmap, Biometrics.FmdFormat.ANSI_378_2004, new Biometrics.OnConvertToFmdListener() {
                                         @Override
                                         public void onConvertToFmd(Biometrics.ResultCode resultCode, byte[] fmd) {

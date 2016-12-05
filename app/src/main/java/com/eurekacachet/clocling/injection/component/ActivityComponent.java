@@ -11,6 +11,7 @@ import com.eurekacachet.clocling.ui.view.bio.fragments.portrait.FaceFragment;
 import com.eurekacachet.clocling.ui.view.bio.fragments.thumb_left.ThumbLeftFragment;
 import com.eurekacachet.clocling.ui.view.bio.fragments.thumb_right.ThumbRightFragment;
 import com.eurekacachet.clocling.ui.view.clocking.ClockingActivity;
+import com.eurekacachet.clocling.ui.view.clocking.modals.ResultModal;
 import com.eurekacachet.clocling.ui.view.login.LoginActivity;
 import com.eurekacachet.clocling.ui.view.login.modal.LoginFragment;
 import com.eurekacachet.clocling.ui.view.main.MainActivity;
@@ -42,4 +43,6 @@ public interface ActivityComponent {
     void inject(FormPictureFragment formPictureFragment);
 
     void inject(ClockingActivity clockingActivity);
+
+    void inject(ResultModal resultModal);
 }

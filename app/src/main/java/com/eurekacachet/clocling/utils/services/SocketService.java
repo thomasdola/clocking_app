@@ -1,23 +1,26 @@
 package com.eurekacachet.clocling.utils.services;
 
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
+import android.telephony.TelephonyManager;
 import android.util.Log;
 
 import com.eurekacachet.clocling.ClockingApplication;
 import com.eurekacachet.clocling.data.DataManager;
 import com.eurekacachet.clocling.ui.view.bio.BioActivity;
-import com.eurekacachet.clocling.ui.view.main.MainActivity;
+import com.eurekacachet.clocling.ui.view.clocking.ClockingActivity;
 import com.eurekacachet.clocling.utils.Constants;
 
-import java.net.URI;
+import org.json.JSONArray;
+import org.json.JSONObject;
+
 import java.util.Arrays;
 
 import javax.inject.Inject;
 
-import io.socket.client.Manager;
 import io.socket.client.Socket;
 import io.socket.emitter.Emitter;
 import rx.functions.Action1;
@@ -29,17 +32,26 @@ public class SocketService extends Service {
     private String mUserUUID;
     private Socket mDefaultSocket;
     private Socket mEnrolmentSocket;
+    private String mConnectionId;
+    private TelephonyManager mTelephonyManager;
+
+    public static Intent getStartIntent(Context context) {
+        return new Intent(context, SocketService.class);
+    }
 
     @Override
     public void onCreate() {
         super.onCreate();
         Log.d(getClass().getSimpleName(), "Start socket service onCreate called");
         ClockingApplication.get(this).getComponent().inject(this);
+        mTelephonyManager = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
         mDefaultSocket = ((ClockingApplication) getApplication()).getDefaultSocket().connect();
+        mConnectionId = mDataManager.getConnectionId();
     }
 
     @Override
     public void onDestroy() {
+        mDefaultSocket.disconnect();
         super.onDestroy();
         Log.d(getClass().getSimpleName(), "Start socket service onDestroy called");
         mDefaultSocket.off(Socket.EVENT_CONNECT, onConnect);
@@ -49,6 +61,8 @@ public class SocketService extends Service {
         mDefaultSocket.off(Socket.EVENT_RECONNECT, onConnect);
         mDefaultSocket.off(Constants.makeEvent(mUserUUID, Constants.CAPTURE_BIO_DATA), onReceiveCaptureBio);
         mDefaultSocket.off(Constants.makeEvent(mUserUUID, Constants.CANCEL_CAPTURE), onReceiveCancelCapture);
+        mDefaultSocket.off(Constants.DEVICES, onReceiveConnectionId);
+        mDefaultSocket.off(Constants.FINGERPRINTS_UPDATED, onFingerprintsUpdated);
     }
 
     @Nullable
@@ -65,6 +79,8 @@ public class SocketService extends Service {
         mDefaultSocket.on(Socket.EVENT_CONNECT_ERROR, onConnectError);
         mDefaultSocket.on(Socket.EVENT_CONNECT_TIMEOUT, onConnectError);
         mDefaultSocket.on(Socket.EVENT_RECONNECT, onConnect);
+        mDefaultSocket.on(Constants.DEVICES, onReceiveConnectionId);
+        mDefaultSocket.on(Constants.FINGERPRINTS_UPDATED, onFingerprintsUpdated);
         listenForBio();
         return START_STICKY;
     }
@@ -104,9 +120,7 @@ public class SocketService extends Service {
 
     private Emitter.Listener onDisconnect = new Emitter.Listener() {
         @Override
-        public void call(Object... args) {
-            Log.d(getClass().getSimpleName(), "socket service disconnected ...");
-        }
+        public void call(Object... args) {}
     };
 
     private Emitter.Listener onConnectError = new Emitter.Listener() {
@@ -133,6 +147,35 @@ public class SocketService extends Service {
         @Override
         public void call(Object... args) {
             closeBioActivity();
+        }
+    };
+
+    private Emitter.Listener onReceiveConnectionId = new Emitter.Listener() {
+        @Override
+        public void call(Object... args) {
+            try {
+                JSONObject object = (JSONObject) args[0];
+                String connectionId = object.getString("connId");
+                mDataManager.setConnectionId(connectionId);
+                JSONObject data = new JSONObject();
+                data.put("deviceId", mTelephonyManager.getDeviceId());
+                data.put("connId", connectionId);
+                data.put("type", Constants.CREDENCE);
+                mDefaultSocket.emit(Constants.DEVICES, data);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    };
+
+    private Emitter.Listener onFingerprintsUpdated = new Emitter.Listener() {
+        @Override
+        public void call(Object... args) {
+//            Intent intent = ClockingActivity.startNewIntent(getApplicationContext());
+//            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+//            startActivity(intent);
+            JSONArray object = (JSONArray) args[0];
+
         }
     };
 }

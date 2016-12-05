@@ -67,7 +67,7 @@ public class ThumbRightFragment extends Fragment implements ThumbRightMvpView {
         mBid = ((BioActivity) getActivity()).getBid();
         mUserUUID = ((BioActivity) getActivity()).getUserUUID();
         mBiometricsManager = ((BioActivity) getActivity()).getBiometricsManager();
-        mFileStore = new FileStore(getContext());
+        mFileStore = new FileStore(getActivity());
         initView(view);
         initListeners();
         if(((BioActivity) getActivity()).getFirstTime()){
@@ -77,7 +77,7 @@ public class ThumbRightFragment extends Fragment implements ThumbRightMvpView {
     }
 
     private void showConfirmBid() {
-        new AlertDialog.Builder(getContext())
+        new AlertDialog.Builder(getActivity())
                 .setIcon(android.R.drawable.ic_dialog_alert)
                 .setMessage(String.format("Capture Bio for %s", mBid))
                 .setPositiveButton(R.string.start_text, new DialogInterface.OnClickListener() {
@@ -134,7 +134,7 @@ public class ThumbRightFragment extends Fragment implements ThumbRightMvpView {
         Log.d(this.getClass().getSimpleName(), String.format("path out -> %s", mThumbRight));
 
         if(mThumbRight != null){
-            File file = new File(getContext().getFilesDir(), Constants.THUMB_RIGHT);
+            File file = new File(getActivity().getFilesDir(), Constants.THUMB_RIGHT);
             if(file.exists()){
                 fingerView.setImageBitmap(BitmapFactory.decodeFile(file.getAbsolutePath()));
             }
@@ -206,16 +206,16 @@ public class ThumbRightFragment extends Fragment implements ThumbRightMvpView {
     }
 
     private void doCleanUp() {
-        getContext().deleteFile(Constants.THUMB_RIGHT);
-        getContext().deleteFile(Constants.THUMB_RIGHT_FMD);
-        getContext().deleteFile(Constants.THUMB_LEFT);
-        getContext().deleteFile(Constants.THUMB_LEFT_FMD);
-        getContext().deleteFile(Constants.INDEX_RIGHT);
-        getContext().deleteFile(Constants.INDEX_RIGHT_FMD);
-        getContext().deleteFile(Constants.INDEX_LEFT);
-        getContext().deleteFile(Constants.INDEX_LEFT_FMD);
-        getContext().deleteFile(Constants.PORTRAIT);
-        getContext().deleteFile(Constants.FORM);
+        getActivity().deleteFile(Constants.THUMB_RIGHT);
+        getActivity().deleteFile(Constants.THUMB_RIGHT_FMD);
+        getActivity().deleteFile(Constants.THUMB_LEFT);
+        getActivity().deleteFile(Constants.THUMB_LEFT_FMD);
+        getActivity().deleteFile(Constants.INDEX_RIGHT);
+        getActivity().deleteFile(Constants.INDEX_RIGHT_FMD);
+        getActivity().deleteFile(Constants.INDEX_LEFT);
+        getActivity().deleteFile(Constants.INDEX_LEFT_FMD);
+        getActivity().deleteFile(Constants.PORTRAIT);
+        getActivity().deleteFile(Constants.FORM);
     }
 
     private void notifyDesktop() {

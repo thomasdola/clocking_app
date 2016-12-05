@@ -17,10 +17,8 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
 
-import com.credenceid.biometrics.Biometrics;
 import com.credenceid.biometrics.BiometricsManager;
 import com.eurekacachet.clocling.R;
-import com.eurekacachet.clocling.data.model.Bio;
 import com.eurekacachet.clocling.ui.base.BaseActivity;
 import com.eurekacachet.clocling.ui.view.bio.BioActivity;
 import com.eurekacachet.clocling.utils.Constants;
@@ -33,8 +31,6 @@ import com.ragnarok.rxcamera.request.Func;
 import org.json.JSONObject;
 
 import java.io.File;
-import java.util.Arrays;
-import java.util.List;
 
 import javax.inject.Inject;
 
@@ -48,9 +44,6 @@ import rx.functions.Action1;
 import rx.functions.Func1;
 import rx.schedulers.Schedulers;
 
-/**
- * A simple {@link Fragment} subclass.
- */
 public class FormPictureFragment extends Fragment implements FormPictureMvpView {
 
     Button backButton;
@@ -59,6 +52,7 @@ public class FormPictureFragment extends Fragment implements FormPictureMvpView 
     Button changeButton;
     Button flashOnButton;
     Button flashOffButton;
+    boolean flashOn;
     ImageView pictureTakenView;
     RxCameraConfig mCameraConfig;
     RxCamera mCamera;
@@ -71,7 +65,7 @@ public class FormPictureFragment extends Fragment implements FormPictureMvpView 
     Socket mEnrolmentSocket;
     private ProgressDialog mProgressDialog;
     private String mUserUUID;
-    private String mBid;
+    String mBid;
 
     public FormPictureFragment() {
         // Required empty public constructor
@@ -81,6 +75,7 @@ public class FormPictureFragment extends Fragment implements FormPictureMvpView 
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_form_picture, container, false);
+        flashOn = false;
         mCameraConfig = new RxCameraConfig.Builder()
                 .useBackCamera()
                 .setAutoFocus(true)
@@ -94,20 +89,10 @@ public class FormPictureFragment extends Fragment implements FormPictureMvpView 
     }
 
     @Override
-    public void enableReview() {
-        reviewButton.setEnabled(true);
-    }
-
-    @Override
-    public void disableReview() {
-        reviewButton.setEnabled(false);
-    }
-
-    @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         ((BaseActivity) getActivity()).getActivityComponent().inject(this);
-        mFileStore = new FileStore(getContext());
+        mFileStore = new FileStore(getActivity());
         mBiometricManager = ((BioActivity) getActivity()).getBiometricsManager();
         mEnrolmentSocket = ((BioActivity) getActivity()).getEnrolmentSocket();
         mUserUUID = ((BioActivity) getActivity()).getUserUUID();
@@ -187,7 +172,7 @@ public class FormPictureFragment extends Fragment implements FormPictureMvpView 
     public void onResume() {
         super.onResume();
         presenter.currentFormPicture();
-        File file = new File(getContext().getFilesDir(), Constants.FORM);
+        File file = new File(getActivity().getFilesDir(), Constants.FORM);
         if(mForm != null && file.exists()){
             pictureTakenView.setImageBitmap(BitmapFactory.decodeFile(file.getAbsolutePath()));
             pictureView.setVisibility(View.INVISIBLE);
@@ -200,7 +185,7 @@ public class FormPictureFragment extends Fragment implements FormPictureMvpView 
     }
 
     private void startCamera() {
-        RxCamera.open(getContext(), mCameraConfig)
+        RxCamera.open(getActivity(), mCameraConfig)
                 .flatMap(new Func1<RxCamera, Observable<RxCamera>>() {
                     @Override
                     public Observable<RxCamera> call(RxCamera rxCamera) {
@@ -240,14 +225,22 @@ public class FormPictureFragment extends Fragment implements FormPictureMvpView 
 
     @Override
     public void onDestroy() {
+        stopCamera();
+        hideReviewing();
         super.onDestroy();
         presenter.detachView();
-        stopCamera();
         mEnrolmentSocket.on(Constants.makeEvent(mUserUUID, Constants.EDIT_CAPTURE), onEditBioData);
     }
 
     @Override
+    public void onPause() {
+        hideReviewing();
+        super.onPause();
+    }
+
+    @Override
     public void onStop() {
+        hideReviewing();
         super.onStop();
         stopCamera();
         presenter.detachView();
@@ -261,6 +254,7 @@ public class FormPictureFragment extends Fragment implements FormPictureMvpView 
                 .subscribe(new Action1<RxCamera>() {
                     @Override
                     public void call(RxCamera rxCamera) {
+                        flashOn = true;
                         flashOffButton.setVisibility(View.VISIBLE);
                         flashOnButton.setVisibility(View.INVISIBLE);
                     }
@@ -275,6 +269,7 @@ public class FormPictureFragment extends Fragment implements FormPictureMvpView 
                 .subscribe(new Action1<RxCamera>() {
                     @Override
                     public void call(RxCamera rxCamera) {
+                        flashOn = false;
                         flashOnButton.setVisibility(View.VISIBLE);
                         flashOffButton.setVisibility(View.INVISIBLE);
                     }
@@ -298,7 +293,7 @@ public class FormPictureFragment extends Fragment implements FormPictureMvpView 
                 flashOnButton.setVisibility(View.VISIBLE);
                 flashOffButton.setVisibility(View.INVISIBLE);
             }
-        }, 320, 320, ImageFormat.JPEG, true)
+        }, 320, 320, ImageFormat.JPEG, flashOn)
                 .subscribe(new Action1<RxCameraData>() {
                     @Override
                     public void call(RxCameraData rxCameraData) {
@@ -309,7 +304,7 @@ public class FormPictureFragment extends Fragment implements FormPictureMvpView 
                         pictureTakenView.setImageBitmap(bitmap);
                         pictureTakenView.setVisibility(View.VISIBLE);
                         presenter.setCurrentFormPicturePath(
-                                (new FileStore(getContext()).save(bitmap, Constants.FORM)).getAbsolutePath()
+                                (new FileStore(getActivity()).save(bitmap, Constants.FORM)).getAbsolutePath()
                         );
                     }
                 });
@@ -321,7 +316,7 @@ public class FormPictureFragment extends Fragment implements FormPictureMvpView 
     }
 
     private void showReviewing() {
-        mProgressDialog = new ProgressDialog(getContext());
+        mProgressDialog = new ProgressDialog(getActivity());
         mProgressDialog.setMessage(getString(R.string.reviewing_text));
         mProgressDialog.setCancelable(false);
         mProgressDialog.setCanceledOnTouchOutside(false);
@@ -334,27 +329,14 @@ public class FormPictureFragment extends Fragment implements FormPictureMvpView 
     }
 
     private void hideReviewing() {
-        if(mProgressDialog != null){
-            if(mProgressDialog.isShowing()){
+        try{
+            if(mProgressDialog != null){
                 mProgressDialog.dismiss();
+                mProgressDialog = null;
             }
-            mProgressDialog = null;
+        }catch (Exception e){
+            e.printStackTrace();
         }
-    }
-
-    @Override
-    public void convertToFmd(List<Bio> bios) {
-        for (final Bio bio : bios){
-            Bitmap bitmap = BitmapFactory.decodeByteArray(bio.getFile(), 0, bio.getFile().length);
-            mBiometricManager.convertToFmd(bitmap, Biometrics.FmdFormat.ANSI_378_2004, new Biometrics.OnConvertToFmdListener() {
-                @Override
-                public void onConvertToFmd(Biometrics.ResultCode resultCode, byte[] bytes) {
-                    bio.setFmd(bytes);
-                    Log.d(getClass().getSimpleName(), String.format("%s -> %s", bio.getType(), Arrays.toString(bytes)));
-                }
-            });
-        }
-        presenter.send(bios);
     }
 
     @Override

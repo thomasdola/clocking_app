@@ -48,6 +48,7 @@ public class FaceFragment extends Fragment implements FaceFragmentMvpView {
     Button changeButton;
     Button flashOnButton;
     Button flashOffButton;
+    boolean flashOn;
     SurfaceView pictureView;
     ImageView pictureTakenView;
     RxCameraConfig mCameraConfig;
@@ -65,8 +66,7 @@ public class FaceFragment extends Fragment implements FaceFragmentMvpView {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_face, container, false);
-        initView(view);
-        initListeners();
+        flashOn = false;
         mCameraConfig = new RxCameraConfig.Builder()
                 .useBackCamera()
                 .setAutoFocus(true)
@@ -74,6 +74,8 @@ public class FaceFragment extends Fragment implements FaceFragmentMvpView {
                 .setPreferPreviewSize(new Point(640, 480), false)
                 .setHandleSurfaceEvent(true)
                 .build();
+        initView(view);
+        initListeners();
         return view;
     }
 
@@ -88,7 +90,7 @@ public class FaceFragment extends Fragment implements FaceFragmentMvpView {
     public void onResume() {
         super.onResume();
         presenter.loadCurrentPortraitPath();
-        File file = new File(getContext().getFilesDir(), Constants.PORTRAIT);
+        File file = new File(getActivity().getFilesDir(), Constants.PORTRAIT);
         if(mPortrait != null && file.exists()){
             pictureTakenView.setImageBitmap(BitmapFactory.decodeFile(file.getAbsolutePath()));
             pictureView.setVisibility(View.INVISIBLE);
@@ -101,7 +103,7 @@ public class FaceFragment extends Fragment implements FaceFragmentMvpView {
     }
 
     private void startCamera() {
-        RxCamera.open(getContext(), mCameraConfig)
+        RxCamera.open(getActivity(), mCameraConfig)
                 .flatMap(new Func1<RxCamera, Observable<RxCamera>>() {
                     @Override
                     public Observable<RxCamera> call(RxCamera rxCamera) {
@@ -141,8 +143,8 @@ public class FaceFragment extends Fragment implements FaceFragmentMvpView {
 
     @Override
     public void onDestroy() {
-        super.onDestroy();
         stopCamera();
+        super.onDestroy();
         presenter.detachView();
     }
 
@@ -210,6 +212,7 @@ public class FaceFragment extends Fragment implements FaceFragmentMvpView {
                 .subscribe(new Action1<RxCamera>() {
                     @Override
                     public void call(RxCamera rxCamera) {
+                        flashOn = true;
                         flashOffButton.setVisibility(View.VISIBLE);
                         flashOnButton.setVisibility(View.INVISIBLE);
                     }
@@ -224,6 +227,7 @@ public class FaceFragment extends Fragment implements FaceFragmentMvpView {
                 .subscribe(new Action1<RxCamera>() {
                     @Override
                     public void call(RxCamera rxCamera) {
+                        flashOn = false;
                         flashOnButton.setVisibility(View.VISIBLE);
                         flashOffButton.setVisibility(View.INVISIBLE);
                     }
@@ -265,7 +269,7 @@ public class FaceFragment extends Fragment implements FaceFragmentMvpView {
                 flashOnButton.setVisibility(View.VISIBLE);
                 flashOffButton.setVisibility(View.INVISIBLE);
             }
-        }, 320, 320, ImageFormat.JPEG, true)
+        }, 320, 320, ImageFormat.JPEG, flashOn)
                 .subscribe(new Action1<RxCameraData>() {
                     @Override
                     public void call(RxCameraData rxCameraData) {
@@ -276,7 +280,7 @@ public class FaceFragment extends Fragment implements FaceFragmentMvpView {
                         pictureTakenView.setImageBitmap(bitmap);
                         pictureTakenView.setVisibility(View.VISIBLE);
                         presenter.setCurrentPortraitPath(
-                                (new FileStore(getContext()).save(bitmap, Constants.PORTRAIT)).getAbsolutePath()
+                                (new FileStore(getActivity()).save(bitmap, Constants.PORTRAIT)).getAbsolutePath()
                         );
                     }
                 });

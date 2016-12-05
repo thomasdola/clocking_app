@@ -1,16 +1,21 @@
 package com.eurekacachet.clocling.data;
 
 
+import android.util.Log;
+
 import com.eurekacachet.clocling.data.local.DatabaseHelper;
 import com.eurekacachet.clocling.data.local.PreferencesHelper;
+import com.eurekacachet.clocling.data.model.ActionResponse;
 import com.eurekacachet.clocling.data.model.AuthResponse;
+import com.eurekacachet.clocling.data.model.Beneficiary;
 import com.eurekacachet.clocling.data.model.BioDic;
+import com.eurekacachet.clocling.data.model.Clock;
+import com.eurekacachet.clocling.data.model.FingerFmd;
 import com.eurekacachet.clocling.data.model.Fingerprint;
 import com.eurekacachet.clocling.data.remote.ClockingService;
 import com.eurekacachet.clocling.utils.Constants;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -20,7 +25,6 @@ import javax.inject.Inject;
 
 import rx.Observable;
 import rx.Subscriber;
-import rx.Subscription;
 import rx.functions.Func0;
 import rx.functions.Func1;
 
@@ -71,6 +75,14 @@ public class DataManager {
         return mPreferencesHelper.getUserUUID();
     }
 
+    public void setLogUUID(String logUUID) {
+        mPreferencesHelper.setLogUUID(logUUID);
+    }
+
+    public Observable<String> getLogUUID(){
+        return mPreferencesHelper.getLogUUID();
+    }
+
     public Observable<String> getDeviceId() {
         return mPreferencesHelper.getDeviceId();
     }
@@ -91,16 +103,19 @@ public class DataManager {
     }
 
     public Observable<Fingerprint> syncFingerprints() {
+        Log.d(getClass().getSimpleName(), "sysncFingerprints called");
         return mClockingService.getFingerprints()
                 .concatMap(new Func1<List<Fingerprint>, Observable<? extends Fingerprint>>() {
                     @Override
                     public Observable<? extends Fingerprint> call(List<Fingerprint> fingerprints) {
+                        Log.d(getClass().getSimpleName(),
+                                String.format("sysncFingerprints called with -> %s", fingerprints));
                         return mDatabaseHelper.saveFingerprints(fingerprints);
                     }
                 });
     }
 
-    public Observable<List<Fingerprint>> getFingerprints(){
+    public Observable<List<FingerFmd>> getFingerprints(){
         return mDatabaseHelper.getFingerprints().distinct();
     }
 
@@ -192,16 +207,36 @@ public class DataManager {
         });
     }
 
-    public Observable<List<byte[]>> getLocalFMDs() {
-        return getFingerprints()
-                .map(new Func1<List<Fingerprint>, List<byte[]>>() {
+
+
+    public String getConnectionId() {
+        return mPreferencesHelper.getConnectionId();
+    }
+
+    public void setConnectionId(String connectionId){
+        mPreferencesHelper.setConnectionId(connectionId);
+    }
+
+    public Observable<Beneficiary> getBeneficiaryDetails(HashMap<String, String> payload) {
+        return mClockingService.clock("clock", payload);
+    }
+
+    public Observable<Clock> saveClock(HashMap<String, String> data) {
+        Clock clock = new Clock();
+        clock.bid = data.get("bid");
+        clock.timestamp = Integer.parseInt(data.get("timestamp"));
+        return mDatabaseHelper.saveClock(clock);
+    }
+
+    public Observable<ActionResponse> syncClocks (){
+        return mDatabaseHelper.getClocks()
+                .concatMap(new Func1<List<Clock>, Observable<? extends ActionResponse>>() {
                     @Override
-                    public List<byte[]> call(List<Fingerprint> fingerprints) {
-                        List<byte[]> fmds = new ArrayList<>();
-                        for(Fingerprint fingerprint : fingerprints){
-                            fmds.add(fingerprint.fingerprint);
-                        }
-                        return fmds;
+                    public Observable<? extends ActionResponse> call(List<Clock> clocks) {
+                        if(clocks.isEmpty()) return null;
+                        Map<String, List<Clock>> payload = new HashMap<>();
+                        payload.put("clocks", clocks);
+                        return mClockingService.pushClocks(payload, Constants.BATCH);
                     }
                 });
     }

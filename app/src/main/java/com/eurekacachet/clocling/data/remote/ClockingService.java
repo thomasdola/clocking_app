@@ -2,7 +2,10 @@ package com.eurekacachet.clocling.data.remote;
 
 
 import com.eurekacachet.clocling.data.local.PreferencesHelper;
+import com.eurekacachet.clocling.data.model.ActionResponse;
 import com.eurekacachet.clocling.data.model.AuthResponse;
+import com.eurekacachet.clocling.data.model.Beneficiary;
+import com.eurekacachet.clocling.data.model.Clock;
 import com.eurekacachet.clocling.data.model.Fingerprint;
 import com.eurekacachet.clocling.utils.Constants;
 import com.google.gson.Gson;
@@ -21,6 +24,8 @@ import retrofit.http.FieldMap;
 import retrofit.http.FormUrlEncoded;
 import retrofit.http.GET;
 import retrofit.http.POST;
+import retrofit.http.Path;
+import retrofit.http.Query;
 import rx.Observable;
 
 public interface ClockingService {
@@ -31,6 +36,15 @@ public interface ClockingService {
 
     @GET("fingerprints")
     Observable<List<Fingerprint>> getFingerprints();
+
+    @FormUrlEncoded
+    @POST("clocks")
+    Observable<Beneficiary> clock(@Query("event") String event,
+                                  @FieldMap Map<String, String> payload);
+
+    @FormUrlEncoded
+    @POST("clocks")
+    Observable<ActionResponse> pushClocks(@FieldMap Map<String, List<Clock>> payload, @Query("type") String type);
 
     class Creator{
 

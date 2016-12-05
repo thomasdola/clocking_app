@@ -98,7 +98,26 @@ public class FormPicturePresenter extends BasePresenter<FormPictureFragment> {
                     }
                 })
                 .toList()
-                .subscribe(new Subscriber<List<Bio>>() {
+                .map(new Func1<List<Bio>, JSONObject>() {
+                    @Override
+                    public JSONObject call(List<Bio> bios) {
+                        JSONObject jsonBios = new JSONObject();
+                        for (Bio bio : bios) {
+                            try{
+                                JSONObject map = new JSONObject();
+                                map.put("bid", bio.getBid());
+                                map.put("encoded", bio.getBase64File());
+                                map.put("fmd", bio.getBase64Fmd());
+                                map.put("type", bio.getType());
+                                jsonBios.put(bio.getType(), map);
+                            }catch (Exception e){
+                                e.printStackTrace();
+                            }
+                        }
+                        return jsonBios;
+                    }
+                })
+                .subscribe(new Subscriber<JSONObject>() {
                     @Override
                     public void onCompleted() {
 
@@ -110,8 +129,8 @@ public class FormPicturePresenter extends BasePresenter<FormPictureFragment> {
                     }
 
                     @Override
-                    public void onNext(List<Bio> bios) {
-                        getMvpView().convertToFmd(bios);
+                    public void onNext(JSONObject jsonBios) {
+                        getMvpView().sendForReview(jsonBios);
                     }
                 });
     }
@@ -128,23 +147,23 @@ public class FormPicturePresenter extends BasePresenter<FormPictureFragment> {
         }
     }
 
-    public void send(List<Bio> bios) {
-        JSONObject jsonBios = new JSONObject();
-        for (Bio bio : bios) {
-            try{
-                JSONObject map = new JSONObject();
-                map.put("bid", bio.getBid());
-                map.put("encoded", bio.getBase64File());
-                map.put("fmd", bio.getBase64Fmd());
-                map.put("type", bio.getType());
-                jsonBios.put(bio.getType(), map);
-            }catch (Exception e){
-                e.printStackTrace();
-            }
-        }
-
-        getMvpView().sendForReview(jsonBios);
-    }
+//    public void send(List<Bio> bios) {
+//        JSONObject jsonBios = new JSONObject();
+//        for (Bio bio : bios) {
+//            try{
+//                JSONObject map = new JSONObject();
+//                map.put("bid", bio.getBid());
+//                map.put("encoded", bio.getBase64File());
+//                map.put("fmd", bio.getBase64Fmd());
+//                map.put("type", bio.getType());
+//                jsonBios.put(bio.getType(), map);
+//            }catch (Exception e){
+//                e.printStackTrace();
+//            }
+//        }
+//
+//        getMvpView().sendForReview(jsonBios);
+//    }
 
     public void editBioData() {
         checkViewAttached();

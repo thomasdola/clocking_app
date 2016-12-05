@@ -64,7 +64,7 @@ public class IndexRightFragment extends Fragment implements IndexRightMvpView {
         presenter.attachView(this);
         mBiometricsManager = ((BioActivity) getActivity())
                 .getBiometricsManager();
-        mFileStore = new FileStore(getContext());
+        mFileStore = new FileStore(getActivity());
     }
 
     @Override
@@ -72,7 +72,7 @@ public class IndexRightFragment extends Fragment implements IndexRightMvpView {
         super.onResume();
         presenter.currentIndexRight();
         if(mIndexRight != null){
-            File file = new File(getContext().getFilesDir(), Constants.INDEX_RIGHT);
+            File file = new File(getActivity().getFilesDir(), Constants.INDEX_RIGHT);
             if(file.exists()){
                 fingerView.setImageBitmap(BitmapFactory.decodeFile(file.getAbsolutePath()));
             }
