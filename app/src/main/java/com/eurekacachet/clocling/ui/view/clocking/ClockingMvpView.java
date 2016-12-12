@@ -12,7 +12,7 @@ public interface ClockingMvpView extends MvpView {
 
     void startCompare(byte[] fmd);
 
-    void onError(String reason);
+    void onError();
 
     void onSuccess();
 

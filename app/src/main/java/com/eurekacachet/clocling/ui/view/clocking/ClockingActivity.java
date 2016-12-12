@@ -20,6 +20,7 @@ import com.eurekacachet.clocling.R;
 import com.eurekacachet.clocling.data.model.Beneficiary;
 import com.eurekacachet.clocling.data.model.Clock;
 import com.eurekacachet.clocling.ui.base.BaseActivity;
+import com.eurekacachet.clocling.ui.view.clocking.modals.ErrorModal;
 import com.eurekacachet.clocling.ui.view.clocking.modals.ResultModal;
 
 import javax.inject.Inject;
@@ -27,6 +28,7 @@ import javax.inject.Inject;
 public class ClockingActivity extends BaseActivity implements ClockingMvpView {
 
     private static final String DISPLAY_CLOCK_INFO_TAG = "display_clock_info";
+    private static final String DISPLAY_MATCH_ERROR_TAG = "display_match_error";
     TextView headerView;
     ImageView fingerView;
     Button scanButton;
@@ -156,8 +158,10 @@ public class ClockingActivity extends BaseActivity implements ClockingMvpView {
     }
 
     @Override
-    public void onError(String reason) {
-        Toast.makeText(ClockingActivity.this, "There Is No Match", Toast.LENGTH_LONG).show();
+    public void onError() {
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        ErrorModal modal = ErrorModal.newInstance();
+        modal.show(fragmentManager, DISPLAY_MATCH_ERROR_TAG);
     }
 
     @Override
@@ -178,4 +182,6 @@ public class ClockingActivity extends BaseActivity implements ClockingMvpView {
         ResultModal modal = ResultModal.newInstance(clock);
         modal.show(fragmentManager, DISPLAY_CLOCK_INFO_TAG);
     }
+
+
 }

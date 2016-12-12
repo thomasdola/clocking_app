@@ -12,6 +12,8 @@
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:background="@drawable/button_background"
+        android:textColor="@color/white"
         android:text="@string/login_text"
         android:id="@+id/login_button"
         android:layout_alignParentBottom="true"
@@ -25,15 +27,39 @@
         android:layout_alignParentTop="true"
         android:layout_alignLeft="@+id/login_button"
         android:layout_alignStart="@+id/login_button"
-        android:layout_marginTop="31dp" />
+        android:layout_marginTop="70dp" />
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:textColor="@color/mgColor"
+        android:textAppearance="?android:attr/textAppearanceLarge"
         android:text="@string/purpose"
         android:id="@+id/purpose_text_view"
         android:layout_above="@+id/login_button"
         android:layout_centerHorizontal="true"
-        android:layout_marginBottom="121dp" />
+        android:layout_marginBottom="130dp"
+        android:textStyle="bold" />
+
+    <ImageView
+        android:background="@drawable/logo"
+        android:layout_width="250dp"
+        android:layout_height="120dp"
+        android:id="@+id/logoView"
+        android:layout_below="@+id/imageView"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="20dp"
+        android:contentDescription="@null" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:textSize="12sp"
+        android:textColor="@color/colorBackground"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:text="@string/powered_by_eureka_cachet"
+        android:id="@+id/eurekaView"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true" />
 </RelativeLayout>

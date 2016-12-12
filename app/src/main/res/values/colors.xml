@@ -4,7 +4,10 @@
     <color name="colorPrimaryDark">#083073</color>
     <color name="colorAccent">#0625d1</color>
     <color name="colorBackground">#0c48a4</color>
+    <color name="mgColor">#503482</color>
     <color name="white">#ffffff</color>
+    <color name="error">#bc0101</color>
+    <color name="success">#03de04</color>
 
     <color name="black_overlay">#f4131313</color>
 </resources>

@@ -67,6 +67,15 @@ public class LoginFragmentPresenter extends BasePresenter<LoginFragmentMvpView> 
                             if(authResponse.userUUID() != null){
                                 mDataManager.setUserUUID(authResponse.userUUID());
                             }
+
+                            if(authResponse.userRoleId() != null){
+                                mDataManager.setUserRoleId(authResponse.userRoleId());
+                            }
+
+                            if(authResponse.logUUID() != null){
+                                mDataManager.setLogUUID(authResponse.logUUID());
+                            }
+
                             mDataManager.setLogin(true);
                             getMvpView().startSocketService();
                             getMvpView().launchMainActivity();

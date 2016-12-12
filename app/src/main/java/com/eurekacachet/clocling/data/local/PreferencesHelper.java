@@ -23,6 +23,7 @@ public class PreferencesHelper {
     private static final String KEY_LOG_UUID = "log_uuid";
     private static final String KEY_DEVICE_ID = "device_id";
     private static final String KEY_CONNECTION_ID = "connId";
+    private static final String KEY_USER_ROLE_ID = "role_id";
 
     private final SharedPreferences mPreferences;
 
@@ -95,6 +96,15 @@ public class PreferencesHelper {
 
     public void setConnectionId(String connId){
         mPreferences.edit().putString(KEY_CONNECTION_ID, connId)
+                .apply();
+    }
+
+    public int getUserRoleId() {
+        return mPreferences.getInt(KEY_USER_ROLE_ID, 0);
+    }
+
+    public void setUserRoleId(Integer id){
+        mPreferences.edit().putInt(KEY_USER_ROLE_ID, id)
                 .apply();
     }
 }

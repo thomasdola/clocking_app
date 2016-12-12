@@ -36,6 +36,19 @@
             android:layout_alignParentRight="true"
             android:layout_alignParentEnd="true" />
 
+        <Button
+            android:textColor="@color/white"
+            android:visibility="invisible"
+            android:background="@drawable/sec_action_button_background"
+            android:textAllCaps="false"
+            android:layout_width="150dp"
+            android:layout_height="60dp"
+            android:text="@string/review_text"
+            android:id="@+id/reviewButton"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="true" />
+
         <SurfaceView
             android:background="@drawable/image_background"
             android:layout_width="320dp"

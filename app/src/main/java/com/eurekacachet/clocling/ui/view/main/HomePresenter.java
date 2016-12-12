@@ -4,8 +4,11 @@ import android.content.Intent;
 import android.util.Log;
 
 import com.eurekacachet.clocling.data.DataManager;
+import com.eurekacachet.clocling.data.model.AuthResponse;
 import com.eurekacachet.clocling.ui.base.BasePresenter;
 import com.eurekacachet.clocling.utils.services.SocketService;
+
+import java.util.HashMap;
 
 import javax.inject.Inject;
 
@@ -73,6 +76,64 @@ public class HomePresenter extends BasePresenter<MainActivity> {
                     public void onNext(String UUID) {
 //                        Log.d("MainActivityPresenter", String.format("user uuid %s", UUID));
                         getMvpView().setUserUUID(UUID);
+                    }
+                });
+    }
+
+    public void getUserRoleId() {
+        checkViewAttached();
+        getMvpView().setRoleId(mDataManager.getUserRoleId());
+    }
+
+    public void logout() {
+        checkViewAttached();
+        getMvpView().showLoading();
+        mSubscription = mDataManager.getLogUUID()
+                .subscribeOn(Schedulers.io())
+                .subscribe(new Subscriber<String>() {
+                    @Override
+                    public void onCompleted() {
+
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        e.printStackTrace();
+                        getMvpView().hideLoading();
+                    }
+
+                    @Override
+                    public void onNext(String logUUID) {
+                        doLogout(logUUID);
+                    }
+                });
+    }
+
+    private void doLogout(String logUUID) {
+        HashMap<String, String> map = new HashMap<>();
+        map.put("log_uuid", logUUID);
+        mSubscription = mDataManager.logout(map)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Subscriber<AuthResponse>() {
+                    @Override
+                    public void onCompleted() {
+
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        e.printStackTrace();
+                        getMvpView().hideLoading();
+                    }
+
+                    @Override
+                    public void onNext(AuthResponse authResponse) {
+                        if(authResponse.code() == 200){
+                            mDataManager.setLogin(false);
+                            getMvpView().closeOut();
+                        }
+                        getMvpView().hideLoading();
                     }
                 });
     }

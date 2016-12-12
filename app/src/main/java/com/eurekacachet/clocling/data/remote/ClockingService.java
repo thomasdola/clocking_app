@@ -14,6 +14,7 @@ import com.squareup.okhttp.Request;
 import com.squareup.okhttp.Response;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -33,6 +34,10 @@ public interface ClockingService {
     @FormUrlEncoded
     @POST("login")
     Observable<AuthResponse> login(@FieldMap Map<String, String> credentials);
+
+    @FormUrlEncoded
+    @POST("logout")
+    Observable<AuthResponse> logout(@FieldMap Map<String, String> map);
 
     @GET("fingerprints")
     Observable<List<Fingerprint>> getFingerprints();

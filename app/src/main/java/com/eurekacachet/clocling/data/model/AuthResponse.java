@@ -14,6 +14,10 @@ public class AuthResponse implements Parcelable {
     String token;
     @Nullable
     String userUUID;
+    @Nullable
+    Integer userRoleId;
+    @Nullable
+    String logUUID;
 
     public int code() {
         return code;
@@ -35,6 +39,16 @@ public class AuthResponse implements Parcelable {
     @Nullable
     public String userUUID() {
         return userUUID;
+    }
+
+    @Nullable
+    public Integer userRoleId(){
+        return userRoleId;
+    }
+
+    @Nullable
+    public String logUUID(){
+        return logUUID;
     }
 
     @Override

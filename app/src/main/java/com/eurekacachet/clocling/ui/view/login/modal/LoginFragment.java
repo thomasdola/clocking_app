@@ -53,6 +53,7 @@ public class LoginFragment extends DialogFragment implements LoginFragmentMvpVie
         args.putString(ARG_DEVICE_ID, deviceId);
         LoginFragment fragment = new LoginFragment();
         fragment.setArguments(args);
+        fragment.setStyle(DialogFragment.STYLE_NO_TITLE, 0);
         return fragment;
     }
 

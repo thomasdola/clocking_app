@@ -10,4 +10,12 @@ public interface HomeMvpView extends MvpView {
     void launchBioDataCaptureActivity();
 
     void setUserUUID(String UUID);
+
+    void setRoleId(int userRoleId);
+
+    void showLoading();
+
+    void hideLoading();
+
+    void closeOut();
 }

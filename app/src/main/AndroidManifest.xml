@@ -43,20 +43,21 @@
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent-filter>
         </receiver>
-        <!--<receiver-->
-            <!--android:name=".utils.receivers.ShutDownReceiver"-->
-            <!--android:enabled="true"-->
-            <!--android:exported="false">-->
-            <!--<intent-filter>-->
-                <!--<action android:name="android.intent.action.REBOOT" />-->
-                <!--<action android:name="android.intent.action.ACTION_SHUTDOWN" />-->
-            <!--</intent-filter>-->
-        <!--</receiver>-->
+        <!-- <receiver -->
+        <!-- android:name=".utils.receivers.ShutDownReceiver" -->
+        <!-- android:enabled="true" -->
+        <!-- android:exported="false"> -->
+        <!-- <intent-filter> -->
+        <!-- <action android:name="android.intent.action.REBOOT" /> -->
+        <!-- <action android:name="android.intent.action.ACTION_SHUTDOWN" /> -->
+        <!-- </intent-filter> -->
+        <!-- </receiver> -->
 
-        <!--<service-->
-            <!--android:name=".utils.services.SocketOffService"-->
-            <!--android:enabled="true"-->
-            <!--android:exported="true"></service>-->
+
+        <!-- <service -->
+        <!-- android:name=".utils.services.SocketOffService" -->
+        <!-- android:enabled="true" -->
+        <!-- android:exported="true"></service> -->
     </application>
 
 </manifest>

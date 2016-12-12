@@ -138,7 +138,7 @@ public class FormPicturePresenter extends BasePresenter<FormPictureFragment> {
     public void readyToReview() {
         checkViewAttached();
         Log.d(getClass().getSimpleName(), "readyToReview called");
-        if(mDataManager.readyToReview()){
+        if(mDataManager.readyToReview(false)){
             Log.d(getClass().getSimpleName(), "ready");
             getMvpView().onReview();
         }else {

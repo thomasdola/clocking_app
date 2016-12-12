@@ -55,6 +55,7 @@ public class ResultModal extends DialogFragment implements ResultMvpView {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setStyle(DialogFragment.STYLE_NO_TITLE, 0);
         if(getArguments() != null){
             mBeneficiary = getArguments().getParcelable(ARG_BENEFICIARY);
             mClock = getArguments().getParcelable(ARG_CLOCK);
@@ -113,6 +114,7 @@ public class ResultModal extends DialogFragment implements ResultMvpView {
             @Override
             public void onClick(View view) {
                 getDialog().dismiss();
+                getActivity().finish();
             }
         });
     }

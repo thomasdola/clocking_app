@@ -33,19 +33,23 @@ public class BioActivity extends BaseActivity implements WizardPageListener, Wiz
 
     private static final String BID_EXTRA = "bid";
     private static final String USER_UUID_EXTRA = "user_uuid";
+    private static final String BIO_DATA_UPDATE_EXTRA = "bio_data_update";
     @Inject BioPresenter presenter;
     private Wizard wizard;
     BiometricsManager mBiometricsManager;
     String mBID;
     String mUserUUID;
     Boolean mFirstTime;
+    private boolean bio_updating;
     private Socket mEnrolmentSocket;
 
-
-    public static Intent startNewIntent(Context context, String userUUID, String bid){
+    public static Intent startNewIntent(Context context, String userUUID, String bid,
+                                        boolean updating){
+        Log.d("BioActivity", String.valueOf(updating));
         Intent intent = new Intent(context, BioActivity.class);
         intent.putExtra(BID_EXTRA, bid);
         intent.putExtra(USER_UUID_EXTRA, userUUID);
+        intent.putExtra(BIO_DATA_UPDATE_EXTRA, updating);
         return intent;
     }
 
@@ -59,10 +63,13 @@ public class BioActivity extends BaseActivity implements WizardPageListener, Wiz
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Log.d(getClass().getSimpleName(), "bio on create called");
         getActivityComponent().inject(this);
         mFirstTime = true;
+        bio_updating = getIntent().getBooleanExtra(BIO_DATA_UPDATE_EXTRA, false);
         mBID = getIntent().getStringExtra(BID_EXTRA).replace("\"", "");
         mUserUUID = getIntent().getStringExtra(USER_UUID_EXTRA);
+        Log.d(getClass().getSimpleName(), String.format("form bio -> %s, %s, %s", bio_updating, mBID, mUserUUID));
         setContentView(R.layout.activity_bio);
         mEnrolmentSocket = ((ClockingApplication) getApplication())
                 .getEnrolmentSocket().connect();
@@ -71,6 +78,10 @@ public class BioActivity extends BaseActivity implements WizardPageListener, Wiz
         presenter.attachView(this);
         initWizard();
         registerReceiver(cancelCaptureBroadcastReceiver, new IntentFilter(Constants.CANCEL_CAPTURE));
+    }
+
+    public boolean isBio_updating(){
+        return bio_updating;
     }
 
     @Override

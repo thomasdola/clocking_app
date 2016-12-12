@@ -25,6 +25,7 @@ import javax.inject.Inject;
 
 import rx.Observable;
 import rx.Subscriber;
+import rx.Subscription;
 import rx.functions.Func0;
 import rx.functions.Func1;
 
@@ -169,7 +170,18 @@ public class DataManager {
         return path != null && (new File(path)).exists();
     }
 
-    public boolean readyToReview(){
+    public boolean readyToReview(boolean updating){
+        if(updating){
+            return portraitExists()
+                    && indexLeftExists()
+                    && indexLeftFmdExists()
+                    && indexRightExists()
+                    && indexRightFmdExists()
+                    && thumbLeftExists()
+                    && thumbLeftFmdExists()
+                    && thumbRightExists()
+                    && thumbRightFmdExists();
+        }
         return portraitExists()
                 && formExists()
                 && indexLeftExists()
@@ -239,5 +251,17 @@ public class DataManager {
                         return mClockingService.pushClocks(payload, Constants.BATCH);
                     }
                 });
+    }
+
+    public int getUserRoleId() {
+        return mPreferencesHelper.getUserRoleId();
+    }
+
+    public void setUserRoleId(Integer id){
+        mPreferencesHelper.setUserRoleId(id);
+    }
+
+    public Observable<AuthResponse> logout(HashMap<String, String> map) {
+        return mClockingService.logout(map);
     }
 }

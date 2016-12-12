@@ -17,7 +17,9 @@ public class Constants {
     public static final String ENROLMENT = "enrolment";
     public static final String CANCEL_CAPTURE = "CancelCapture";
     public static final String CAPTURE_BIO_DATA = "CaptureBioData";
+    public static final String CAPTURE_BIO_DATA_UPDATE = "CaptureBioDataUpdate";
     public static final String REVIEW_BIO_DATA = "ReviewBioData";
+    public static final String REVIEW_BIO_DATA_UPDATE = "ReviewBioDataUpdate";
     public static final String EDIT_CAPTURE = "EditBioData";
     public static final String DEVICES = "DEVICES";
     public static final String DEVICE_CONNECTED = "Device:Connected";

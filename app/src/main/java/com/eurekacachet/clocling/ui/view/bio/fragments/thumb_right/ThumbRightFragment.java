@@ -12,6 +12,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -77,8 +78,9 @@ public class ThumbRightFragment extends Fragment implements ThumbRightMvpView {
     }
 
     private void showConfirmBid() {
-        new AlertDialog.Builder(getActivity())
-                .setIcon(android.R.drawable.ic_dialog_alert)
+        AlertDialog.Builder builder;
+        AlertDialog alertDialog;
+        builder = new AlertDialog.Builder(getActivity())
                 .setMessage(String.format("Capture Bio for %s", mBid))
                 .setPositiveButton(R.string.start_text, new DialogInterface.OnClickListener() {
                     @Override
@@ -92,8 +94,10 @@ public class ThumbRightFragment extends Fragment implements ThumbRightMvpView {
                         notifyDesktop();
                         getActivity().finish();
                     }
-                })
-                .show();
+                });
+        alertDialog = builder.create();
+        alertDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        alertDialog.show();
     }
 
     @Override

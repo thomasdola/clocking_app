@@ -1,5 +1,6 @@
 package com.eurekacachet.clocling.ui.view.main;
 
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -7,6 +8,7 @@ import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.eurekacachet.clocling.ClockingApplication;
@@ -16,10 +18,12 @@ import com.eurekacachet.clocling.ui.view.bio.BioActivity;
 import com.eurekacachet.clocling.ui.view.clocking.ClockingActivity;
 import com.eurekacachet.clocling.ui.view.login.LoginActivity;
 import com.eurekacachet.clocling.utils.Constants;
+import com.eurekacachet.clocling.utils.services.SocketService;
 import com.eurekacachet.clocling.utils.services.SyncService;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.w3c.dom.Text;
 
 import javax.inject.Inject;
 
@@ -31,16 +35,25 @@ public class MainActivity extends BaseActivity implements HomeMvpView {
     private static final String EXTRA_TRIGGER_SYNC_FLAG = "EXTRA_TRIGGER_SYNC_FLAG";
     Button mClockingButton;
     Button mCaptureBioButton;
+    Button mLogoutButton;
+    TextView mDeviceTextView;
     String mUserUUID;
 
     TelephonyManager telephonyManager;
     @Inject
     HomePresenter presenter;
+    int mUserRoleId;
+    private ProgressDialog mProgressDialog;
 
     public static Intent getStartIntent(Context context, boolean triggerDataSyncOnCreate) {
         Intent intent = new Intent(context, MainActivity.class);
         intent.putExtra(EXTRA_TRIGGER_SYNC_FLAG, triggerDataSyncOnCreate);
         return intent;
+    }
+
+    @Override
+    public void setRoleId(int userRoleId) {
+        mUserRoleId = userRoleId;
     }
 
     @Override
@@ -51,6 +64,7 @@ public class MainActivity extends BaseActivity implements HomeMvpView {
         initView();
         presenter.attachView(this);
         presenter.isLoggedIn();
+        presenter.getUserRoleId();
 
         if (getIntent().getBooleanExtra(EXTRA_TRIGGER_SYNC_FLAG, true)) {
             startService(SyncService.getStartIntent(this));
@@ -61,10 +75,41 @@ public class MainActivity extends BaseActivity implements HomeMvpView {
         initListeners();
     }
 
+    @Override
+    public void showLoading() {
+        mProgressDialog = new ProgressDialog(this);
+        mProgressDialog.setMessage(getString(R.string.please_wait));
+        mProgressDialog.setCancelable(false);
+        mProgressDialog.setCanceledOnTouchOutside(false);
+        mProgressDialog.show();
+    }
+
+    @Override
+    public void hideLoading() {
+        if(mProgressDialog != null){
+            if(mProgressDialog.isShowing()){
+                mProgressDialog.dismiss();
+            }
+            mProgressDialog = null;
+        }
+    }
+
+    @Override
+    public void closeOut() {
+        stopService(new Intent(this, SocketService.class));
+        launchLoginActivity();
+        finish();
+    }
+
     private void initView() {
         mCaptureBioButton = (Button) findViewById(R.id.bio_button);
-//        mCaptureBioButton.setEnabled(false);
         mClockingButton = (Button) findViewById(R.id.clocking_button);
+        mLogoutButton = (Button) findViewById(R.id.logoutButton);
+        mDeviceTextView = (TextView) findViewById(R.id.deviceIdView);
+        if(mUserRoleId == 1){
+            mDeviceTextView.setText(telephonyManager.getDeviceId());
+            mDeviceTextView.setVisibility(View.VISIBLE);
+        }
     }
 
     private void initListeners() {
@@ -76,10 +121,10 @@ public class MainActivity extends BaseActivity implements HomeMvpView {
             }
         });
 
-        mCaptureBioButton.setOnClickListener(new View.OnClickListener() {
+        mLogoutButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
+                presenter.logout();
             }
         });
     }

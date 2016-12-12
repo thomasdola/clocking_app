@@ -1,8 +1,6 @@
 package com.eurekacachet.clocling.ui.view.clocking;
 
 
-import android.util.Log;
-
 import com.credenceid.biometrics.Biometrics;
 import com.credenceid.biometrics.BiometricsManager;
 import com.eurekacachet.clocling.data.DataManager;
@@ -15,13 +13,13 @@ import com.eurekacachet.clocling.utils.NetworkUtil;
 import java.sql.Timestamp;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import javax.inject.Inject;
 
 import rx.Subscriber;
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
+import rx.functions.Action1;
 import rx.schedulers.Schedulers;
 
 public class ClockingPresenter extends BasePresenter<ClockingActivity> {
@@ -53,40 +51,35 @@ public class ClockingPresenter extends BasePresenter<ClockingActivity> {
         subscription = mDataManager.getFingerprints()
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Subscriber<List<FingerFmd>>() {
+                .subscribe(new Action1<List<FingerFmd>>() {
                     @Override
-                    public void onCompleted() {
-
+                    public void call(List<FingerFmd> fingerFmds) {
+                        doComparison(fmd, fingerFmds.get(0), biometricsManager, fingerFmds, deviceId);
                     }
+                });
+    }
 
+    private void doComparison(final byte[] subject, final FingerFmd variable, final BiometricsManager biometricsManager,
+                              final List<FingerFmd> fingerFmdList, final String deviceId){
+        biometricsManager.compareFmd(subject, variable.fmd, Biometrics.FmdFormat.ANSI_378_2004,
+                new Biometrics.OnCompareFmdListener() {
                     @Override
-                    public void onError(Throwable e) {
-                        e.printStackTrace();
-                        getMvpView().hideLoading();
-                    }
+                    public void onCompareFmd(Biometrics.ResultCode resultCode, float v) {
+                        if(resultCode == Biometrics.ResultCode.OK && v == 0){
+                            Timestamp timestamp = new Timestamp(System.currentTimeMillis());
+                            final HashMap<String, String> data = new HashMap<>();
+                            data.put("timestamp", timestamp.toString());
+                            data.put("bid", variable.bid);
+                            data.put("device_id", deviceId);
+                            persistClock(data);
+                            biometricsManager.finalizeBiometrics(true);
+                        }
 
-                    @Override
-                    public void onNext(List<FingerFmd> fingerFmds) {
-                        for (final FingerFmd fingerFmd : fingerFmds){
-                            biometricsManager.compareFmd(fmd, fingerFmd.fmd,
-                                    Biometrics.FmdFormat.ANSI_378_2004,
-                                    new Biometrics.OnCompareFmdListener() {
-                                        @Override
-                                        public void onCompareFmd(Biometrics.ResultCode resultCode, float score) {
-                                            if(score == 0){
-                                                Timestamp timestamp = new Timestamp(System.currentTimeMillis());
-                                                final HashMap<String, String> data = new HashMap<>();
-                                                data.put("timestamp", timestamp.toString());
-                                                data.put("bid", fingerFmd.bid);
-                                                data.put("device_id", deviceId);
-                                                persistClock(data);
-                                                Log.d(getClass().getSimpleName(), String.format("result -> %s", score));
-                                                Log.d(getClass().getSimpleName(), String.format("result -> %s", true));
-                                            }else {
-                                                getMvpView().hideLoading();
-                                            }
-                                        }
-                                    });
+                        if(fingerFmdList.iterator().hasNext() && fingerFmdList.remove(variable) && !fingerFmdList.isEmpty()){
+                            doComparison(subject, fingerFmdList.iterator().next(), biometricsManager, fingerFmdList, deviceId);
+                        }else {
+                            getMvpView().hideLoading();
+                            getMvpView().onError();
                         }
                     }
                 });

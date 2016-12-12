@@ -60,6 +60,7 @@ public class SocketService extends Service {
         mDefaultSocket.off(Socket.EVENT_CONNECT_TIMEOUT, onConnectError);
         mDefaultSocket.off(Socket.EVENT_RECONNECT, onConnect);
         mDefaultSocket.off(Constants.makeEvent(mUserUUID, Constants.CAPTURE_BIO_DATA), onReceiveCaptureBio);
+        mDefaultSocket.off(Constants.makeEvent(mUserUUID, Constants.CAPTURE_BIO_DATA), onReceiveCaptureBioUpdate);
         mDefaultSocket.off(Constants.makeEvent(mUserUUID, Constants.CANCEL_CAPTURE), onReceiveCancelCapture);
         mDefaultSocket.off(Constants.DEVICES, onReceiveConnectionId);
         mDefaultSocket.off(Constants.FINGERPRINTS_UPDATED, onFingerprintsUpdated);
@@ -92,16 +93,18 @@ public class SocketService extends Service {
                     public void call(String uuid) {
                         mUserUUID = uuid;
                         String captureBioDataEvent = Constants.makeEvent(uuid, Constants.CAPTURE_BIO_DATA);
+                        String captureBioDataUpdateEvent = Constants.makeEvent(uuid, Constants.CAPTURE_BIO_DATA_UPDATE);
                         String cancelCaptureBioDataEvent = Constants.makeEvent(uuid, Constants.CANCEL_CAPTURE);
                         Log.d(getClass().getSimpleName(), String.format("user uuid -> %s on %s", uuid, captureBioDataEvent));
                         mDefaultSocket.on(captureBioDataEvent, onReceiveCaptureBio);
+                        mDefaultSocket.on(captureBioDataUpdateEvent, onReceiveCaptureBio);
                         mDefaultSocket.on(cancelCaptureBioDataEvent, onReceiveCancelCapture);
                     }
                 });
     }
 
-    private void launchBioActivity(String bid){
-        Intent intent = BioActivity.startNewIntent(this, mUserUUID, bid);
+    private void launchBioActivity(String bid, boolean updating){
+        Intent intent = BioActivity.startNewIntent(this, mUserUUID, bid, updating);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         this.startActivity(intent);
     }
@@ -136,7 +139,20 @@ public class SocketService extends Service {
             Log.d(getClass().getSimpleName(), String.format("socket service data => %s", args[0]));
             try{
                 String bid = (String) args[0];
-                launchBioActivity(bid);
+                launchBioActivity(bid, false);
+            }catch (Exception e){
+                e.printStackTrace();
+            }
+        }
+    };
+
+    private Emitter.Listener onReceiveCaptureBioUpdate = new Emitter.Listener() {
+        @Override
+        public void call(Object... args) {
+            Log.d(getClass().getSimpleName(), String.format("socket service data => %s", args[0]));
+            try{
+                String bid = (String) args[0];
+                launchBioActivity(bid, true);
             }catch (Exception e){
                 e.printStackTrace();
             }
