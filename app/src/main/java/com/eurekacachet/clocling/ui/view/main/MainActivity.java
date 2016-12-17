@@ -8,35 +8,26 @@ import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.eurekacachet.clocling.ClockingApplication;
 import com.eurekacachet.clocling.R;
 import com.eurekacachet.clocling.ui.base.BaseActivity;
 import com.eurekacachet.clocling.ui.view.bio.BioActivity;
 import com.eurekacachet.clocling.ui.view.clocking.ClockingActivity;
 import com.eurekacachet.clocling.ui.view.login.LoginActivity;
-import com.eurekacachet.clocling.utils.Constants;
 import com.eurekacachet.clocling.utils.services.SocketService;
 import com.eurekacachet.clocling.utils.services.SyncService;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.w3c.dom.Text;
-
 import javax.inject.Inject;
-
-import io.socket.client.Socket;
-import io.socket.emitter.Emitter;
 
 public class MainActivity extends BaseActivity implements HomeMvpView {
 
     private static final String EXTRA_TRIGGER_SYNC_FLAG = "EXTRA_TRIGGER_SYNC_FLAG";
-    Button mClockingButton;
-    Button mCaptureBioButton;
+    RelativeLayout mClockingButton;
     Button mLogoutButton;
-    TextView mDeviceTextView;
+    TextView mDeviceIdTextView;
     String mUserUUID;
 
     TelephonyManager telephonyManager;
@@ -53,6 +44,7 @@ public class MainActivity extends BaseActivity implements HomeMvpView {
 
     @Override
     public void setRoleId(int userRoleId) {
+        Log.d(getClass().getSimpleName(), String.format("role id -> %s", userRoleId));
         mUserRoleId = userRoleId;
     }
 
@@ -61,7 +53,6 @@ public class MainActivity extends BaseActivity implements HomeMvpView {
         super.onCreate(savedInstanceState);
         getActivityComponent().inject(this);
         setContentView(R.layout.activity_home);
-        initView();
         presenter.attachView(this);
         presenter.isLoggedIn();
         presenter.getUserRoleId();
@@ -72,6 +63,7 @@ public class MainActivity extends BaseActivity implements HomeMvpView {
 
         presenter.getUserUUID();
         telephonyManager = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
+        initView();
         initListeners();
     }
 
@@ -102,13 +94,12 @@ public class MainActivity extends BaseActivity implements HomeMvpView {
     }
 
     private void initView() {
-        mCaptureBioButton = (Button) findViewById(R.id.bio_button);
-        mClockingButton = (Button) findViewById(R.id.clocking_button);
+        mClockingButton = (RelativeLayout) findViewById(R.id.clocking_button);
         mLogoutButton = (Button) findViewById(R.id.logoutButton);
-        mDeviceTextView = (TextView) findViewById(R.id.deviceIdView);
+        mDeviceIdTextView = (TextView) findViewById(R.id.deviceIdView);
         if(mUserRoleId == 1){
-            mDeviceTextView.setText(telephonyManager.getDeviceId());
-            mDeviceTextView.setVisibility(View.VISIBLE);
+            mDeviceIdTextView.setText(telephonyManager.getDeviceId());
+            mDeviceIdTextView.setVisibility(View.VISIBLE);
         }
     }
 
@@ -127,6 +118,11 @@ public class MainActivity extends BaseActivity implements HomeMvpView {
                 presenter.logout();
             }
         });
+    }
+
+    @Override
+    public void onError(String reason) {
+        Toast.makeText(MainActivity.this, reason, Toast.LENGTH_SHORT).show();
     }
 
     @Override

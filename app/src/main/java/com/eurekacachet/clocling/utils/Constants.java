@@ -27,8 +27,8 @@ public class Constants {
     public static final String CREDENCE = "CREDENCE";
     public static final String FINGERPRINTS_UPDATED = "FINGERPRINTS:UPDATED";
     public static final String BATCH = "batch";
-    public static String SOCKET_URL = "http://192.168.1.136:6001";
-    public static String SERVER_URL = "http://192.168.1.136/device-api/";
+    public static String SOCKET_URL = "http://192.168.1.138:6001";
+    public static String SERVER_URL = "http://192.168.1.138/device-api/";
 
     public static String makeEvent(String UUID, String event){
         return String.format("%s:%s", UUID, event);

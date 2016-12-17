@@ -103,9 +103,9 @@ public class DataManager {
         return mDatabaseHelper.saveFingerprints(fingerprints);
     }
 
-    public Observable<Fingerprint> syncFingerprints() {
+    public Observable<Fingerprint> syncFingerprints(String deviceId) {
         Log.d(getClass().getSimpleName(), "sysncFingerprints called");
-        return mClockingService.getFingerprints()
+        return mClockingService.getFingerprints(deviceId)
                 .concatMap(new Func1<List<Fingerprint>, Observable<? extends Fingerprint>>() {
                     @Override
                     public Observable<? extends Fingerprint> call(List<Fingerprint> fingerprints) {
@@ -240,14 +240,15 @@ public class DataManager {
         return mDatabaseHelper.saveClock(clock);
     }
 
-    public Observable<ActionResponse> syncClocks (){
+    public Observable<ActionResponse> syncClocks (final String deviceId){
         return mDatabaseHelper.getClocks()
                 .concatMap(new Func1<List<Clock>, Observable<? extends ActionResponse>>() {
                     @Override
                     public Observable<? extends ActionResponse> call(List<Clock> clocks) {
                         if(clocks.isEmpty()) return null;
-                        Map<String, List<Clock>> payload = new HashMap<>();
+                        Map<String, Object> payload = new HashMap<>();
                         payload.put("clocks", clocks);
+                        payload.put("device_id", deviceId);
                         return mClockingService.pushClocks(payload, Constants.BATCH);
                     }
                 });
@@ -263,5 +264,10 @@ public class DataManager {
 
     public Observable<AuthResponse> logout(HashMap<String, String> map) {
         return mClockingService.logout(map);
+    }
+
+
+    public Observable<Void> deleteAllLocalClocks() {
+        return mDatabaseHelper.deleteAllClocks();
     }
 }

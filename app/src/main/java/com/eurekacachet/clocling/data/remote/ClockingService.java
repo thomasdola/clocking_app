@@ -39,8 +39,8 @@ public interface ClockingService {
     @POST("logout")
     Observable<AuthResponse> logout(@FieldMap Map<String, String> map);
 
-    @GET("fingerprints")
-    Observable<List<Fingerprint>> getFingerprints();
+    @GET("fingerprints/{deviceId}")
+    Observable<List<Fingerprint>> getFingerprints(@Path("deviceId") String deviceId);
 
     @FormUrlEncoded
     @POST("clocks")
@@ -49,7 +49,7 @@ public interface ClockingService {
 
     @FormUrlEncoded
     @POST("clocks")
-    Observable<ActionResponse> pushClocks(@FieldMap Map<String, List<Clock>> payload, @Query("type") String type);
+    Observable<ActionResponse> pushClocks(@FieldMap Map<String, Object> payload, @Query("type") String type);
 
     class Creator{
 

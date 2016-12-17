@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.os.IBinder;
+import android.telephony.TelephonyManager;
 import android.util.Log;
 
 import com.eurekacachet.clocling.ClockingApplication;
@@ -27,6 +28,7 @@ public class SyncService extends Service {
     @Inject
     DataManager mDataManager;
     private Subscription mSubscription;
+    private TelephonyManager telephonyManager;
 
     public static Intent getStartIntent(Context context) {
         return new Intent(context, SyncService.class);
@@ -40,6 +42,7 @@ public class SyncService extends Service {
     public void onCreate() {
         super.onCreate();
         ClockingApplication.get(this).getComponent().inject(this);
+        telephonyManager = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
     }
 
     @Override
@@ -54,7 +57,7 @@ public class SyncService extends Service {
         }
 
         if (mSubscription != null && !mSubscription.isUnsubscribed()) mSubscription.unsubscribe();
-        mSubscription = mDataManager.syncFingerprints()
+        mSubscription = mDataManager.syncFingerprints(telephonyManager.getDeviceId())
                 .subscribeOn(Schedulers.io())
                 .subscribe(new Subscriber<Fingerprint>() {
                     @Override
@@ -72,7 +75,7 @@ public class SyncService extends Service {
                     public void onNext(Fingerprint fingerprint) {}
                 });
 
-        mSubscription = mDataManager.syncClocks()
+        mSubscription = mDataManager.syncClocks(telephonyManager.getDeviceId())
                 .subscribeOn(Schedulers.io())
                 .subscribe(new Subscriber<ActionResponse>() {
                     @Override
@@ -87,10 +90,33 @@ public class SyncService extends Service {
                     }
 
                     @Override
-                    public void onNext(ActionResponse actionResponse) {}
+                    public void onNext(ActionResponse actionResponse) {
+                        if(actionResponse.status == 200){
+                            cleanOldLocalClocks();
+                        }
+                    }
                 });
 
         return START_STICKY;
+    }
+
+    private void cleanOldLocalClocks() {
+        mSubscription = mDataManager.deleteAllLocalClocks()
+                .subscribeOn(Schedulers.io())
+                .subscribe(new Subscriber<Void>() {
+                    @Override
+                    public void onCompleted() {
+
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        e.printStackTrace();
+                    }
+
+                    @Override
+                    public void onNext(Void aVoid) {}
+                });
     }
 
     @Override

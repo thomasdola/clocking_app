@@ -99,6 +99,7 @@ public class HomePresenter extends BasePresenter<MainActivity> {
                     @Override
                     public void onError(Throwable e) {
                         e.printStackTrace();
+                        getMvpView().onError("Please Check Connection And Try Again.");
                         getMvpView().hideLoading();
                     }
 

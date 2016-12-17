@@ -18,4 +18,6 @@ public interface HomeMvpView extends MvpView {
     void hideLoading();
 
     void closeOut();
+
+    void onError(String reason);
 }

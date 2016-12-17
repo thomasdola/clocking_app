@@ -114,7 +114,7 @@ public class ResultModal extends DialogFragment implements ResultMvpView {
             @Override
             public void onClick(View view) {
                 getDialog().dismiss();
-                getActivity().finish();
+//                getActivity().finish();
             }
         });
     }

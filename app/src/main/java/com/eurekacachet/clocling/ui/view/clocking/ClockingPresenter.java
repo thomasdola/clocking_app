@@ -72,14 +72,11 @@ public class ClockingPresenter extends BasePresenter<ClockingActivity> {
                             data.put("bid", variable.bid);
                             data.put("device_id", deviceId);
                             persistClock(data);
-                            biometricsManager.finalizeBiometrics(true);
-                        }
-
-                        if(fingerFmdList.iterator().hasNext() && fingerFmdList.remove(variable) && !fingerFmdList.isEmpty()){
+                        }else if(fingerFmdList.iterator().hasNext() && fingerFmdList.remove(variable) && !fingerFmdList.isEmpty()){
                             doComparison(subject, fingerFmdList.iterator().next(), biometricsManager, fingerFmdList, deviceId);
                         }else {
+                            getMvpView().onMatchFailed();
                             getMvpView().hideLoading();
-                            getMvpView().onError();
                         }
                     }
                 });
@@ -91,6 +88,7 @@ public class ClockingPresenter extends BasePresenter<ClockingActivity> {
         }else {
             saveOnline(data);
         }
+//        saveOnline(data);
     }
 
     private void saveOnline(final HashMap<String, String> data) {
@@ -106,7 +104,7 @@ public class ClockingPresenter extends BasePresenter<ClockingActivity> {
                     @Override
                     public void onError(Throwable e) {
                         e.printStackTrace();
-                        saveLocally(data);
+                        getMvpView().onError("Please Check Connection And Try Again...");
                         getMvpView().hideLoading();
                     }
 

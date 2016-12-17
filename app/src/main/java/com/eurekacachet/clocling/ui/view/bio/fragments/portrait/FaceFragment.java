@@ -71,6 +71,7 @@ public class FaceFragment extends Fragment implements FaceFragmentMvpView {
     String mUserUUID;
     String mBid;
     ProgressDialog mProgressDialog;
+    private View mView;
 
     public FaceFragment() {
         // Required empty public constructor
@@ -80,37 +81,32 @@ public class FaceFragment extends Fragment implements FaceFragmentMvpView {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_face, container, false);
+        mView = inflater.inflate(R.layout.fragment_face, container, false);
         flashOn = false;
         mCameraConfig = new RxCameraConfig.Builder()
                 .useBackCamera()
                 .setAutoFocus(true)
-                .setPreferPreviewFrameRate(15, 30)
-                .setPreferPreviewSize(new Point(640, 480), false)
+                .setPreferPreviewFrameRate(15, 15)
+                .setPreferPreviewSize(new Point(720, 720), false)
                 .setHandleSurfaceEvent(true)
                 .build();
-        initView(view);
-        initListeners();
-        return view;
+        return mView;
     }
 
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         ((BaseActivity) getActivity()).getActivityComponent().inject(this);
+        mIsUpdating = ((BioActivity) getActivity()).isBio_updating();
+        presenter.attachView(this);
+        initView(mView);
         mFileStore = new FileStore(getActivity());
         mBiometricManager = ((BioActivity) getActivity()).getBiometricsManager();
         mEnrolmentSocket = ((BioActivity) getActivity()).getEnrolmentSocket();
         mUserUUID = ((BioActivity) getActivity()).getUserUUID();
         mBid = ((BioActivity)getActivity()).getBid();
         mEnrolmentSocket.on(Constants.makeEvent(mUserUUID, Constants.EDIT_CAPTURE), onEditBioData);
-        presenter.attachView(this);
-        mIsUpdating = ((BioActivity) getActivity()).isBio_updating();
         Log.d(getClass().getSimpleName(), String.format("is updating -> %s", mIsUpdating));
-        if(mIsUpdating){
-            reviewButton.setVisibility(View.VISIBLE);
-            nextButton.setVisibility(View.INVISIBLE);
-        }
     }
 
     @Override
@@ -248,9 +244,19 @@ public class FaceFragment extends Fragment implements FaceFragmentMvpView {
             return;
         }
         mCamera.action().flashAction(true)
-                .subscribe(new Action1<RxCamera>() {
+                .subscribe(new Subscriber<RxCamera>() {
                     @Override
-                    public void call(RxCamera rxCamera) {
+                    public void onCompleted() {
+
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        e.printStackTrace();
+                    }
+
+                    @Override
+                    public void onNext(RxCamera rxCamera) {
                         flashOn = true;
                         flashOffButton.setVisibility(View.VISIBLE);
                         flashOnButton.setVisibility(View.INVISIBLE);
@@ -263,9 +269,19 @@ public class FaceFragment extends Fragment implements FaceFragmentMvpView {
             return;
         }
         mCamera.action().flashAction(false)
-                .subscribe(new Action1<RxCamera>() {
+                .subscribe(new Subscriber<RxCamera>() {
                     @Override
-                    public void call(RxCamera rxCamera) {
+                    public void onCompleted() {
+
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        e.printStackTrace();
+                    }
+
+                    @Override
+                    public void onNext(RxCamera rxCamera) {
                         flashOn = false;
                         flashOnButton.setVisibility(View.VISIBLE);
                         flashOffButton.setVisibility(View.INVISIBLE);
@@ -279,6 +295,10 @@ public class FaceFragment extends Fragment implements FaceFragmentMvpView {
         nextButton = (Button) view.findViewById(R.id.nextButton);
         reviewButton = (Button) view.findViewById(R.id.reviewButton);
         Log.d(getClass().getSimpleName(), String.format("is updating -> %s", mIsUpdating));
+        if(mIsUpdating){
+            reviewButton.setVisibility(View.VISIBLE);
+            nextButton.setVisibility(View.INVISIBLE);
+        }
         flashOnButton = (Button) view.findViewById(R.id.flashOnButton);
         flashOffButton = (Button) view.findViewById(R.id.flashOffButton);
         flashOffButton.setVisibility(View.INVISIBLE);
@@ -287,6 +307,8 @@ public class FaceFragment extends Fragment implements FaceFragmentMvpView {
         pictureTakenView.setVisibility(View.INVISIBLE);
         changeButton = (Button) view.findViewById(R.id.changePictureButton);
         changeButton.setVisibility(View.INVISIBLE);
+
+        initListeners();
     }
 
     private boolean checkCamera() {
@@ -311,9 +333,19 @@ public class FaceFragment extends Fragment implements FaceFragmentMvpView {
                 flashOffButton.setVisibility(View.INVISIBLE);
             }
         }, 320, 320, ImageFormat.JPEG, flashOn)
-                .subscribe(new Action1<RxCameraData>() {
+                .subscribe(new Subscriber<RxCameraData>() {
                     @Override
-                    public void call(RxCameraData rxCameraData) {
+                    public void onCompleted() {
+
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        e.printStackTrace();
+                    }
+
+                    @Override
+                    public void onNext(RxCameraData rxCameraData) {
                         Bitmap bitmap = BitmapFactory
                                 .decodeByteArray(rxCameraData.cameraData, 0, rxCameraData.cameraData.length);
                         bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(),

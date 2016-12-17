@@ -251,9 +251,19 @@ public class FormPictureFragment extends Fragment implements FormPictureMvpView 
             return;
         }
         mCamera.action().flashAction(true)
-                .subscribe(new Action1<RxCamera>() {
+                .subscribe(new Subscriber<RxCamera>() {
                     @Override
-                    public void call(RxCamera rxCamera) {
+                    public void onCompleted() {
+
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        e.printStackTrace();
+                    }
+
+                    @Override
+                    public void onNext(RxCamera rxCamera) {
                         flashOn = true;
                         flashOffButton.setVisibility(View.VISIBLE);
                         flashOnButton.setVisibility(View.INVISIBLE);
@@ -266,9 +276,19 @@ public class FormPictureFragment extends Fragment implements FormPictureMvpView 
             return;
         }
         mCamera.action().flashAction(false)
-                .subscribe(new Action1<RxCamera>() {
+                .subscribe(new Subscriber<RxCamera>() {
                     @Override
-                    public void call(RxCamera rxCamera) {
+                    public void onCompleted() {
+
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        e.printStackTrace();
+                    }
+
+                    @Override
+                    public void onNext(RxCamera rxCamera) {
                         flashOn = false;
                         flashOnButton.setVisibility(View.VISIBLE);
                         flashOffButton.setVisibility(View.INVISIBLE);
@@ -294,9 +314,19 @@ public class FormPictureFragment extends Fragment implements FormPictureMvpView 
                 flashOffButton.setVisibility(View.INVISIBLE);
             }
         }, 320, 320, ImageFormat.JPEG, flashOn)
-                .subscribe(new Action1<RxCameraData>() {
+                .subscribe(new Subscriber<RxCameraData>() {
                     @Override
-                    public void call(RxCameraData rxCameraData) {
+                    public void onCompleted() {
+
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        e.printStackTrace();
+                    }
+
+                    @Override
+                    public void onNext(RxCameraData rxCameraData) {
                         Bitmap bitmap = BitmapFactory
                                 .decodeByteArray(rxCameraData.cameraData, 0, rxCameraData.cameraData.length);
                         bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(),

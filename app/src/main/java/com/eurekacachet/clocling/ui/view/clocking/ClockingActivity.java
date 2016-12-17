@@ -22,6 +22,7 @@ import com.eurekacachet.clocling.data.model.Clock;
 import com.eurekacachet.clocling.ui.base.BaseActivity;
 import com.eurekacachet.clocling.ui.view.clocking.modals.ErrorModal;
 import com.eurekacachet.clocling.ui.view.clocking.modals.ResultModal;
+import com.eurekacachet.clocling.utils.services.SyncService;
 
 import javax.inject.Inject;
 
@@ -47,6 +48,7 @@ public class ClockingActivity extends BaseActivity implements ClockingMvpView {
         super.onCreate(savedInstanceState);
         getActivityComponent().inject(this);
         setContentView(R.layout.activity_clocking);
+        startService(SyncService.getStartIntent(this));
         mTelephonyManager = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
         mBiometricsManager = new BiometricsManager(this);
         presenter.attachView(this);
@@ -109,6 +111,19 @@ public class ClockingActivity extends BaseActivity implements ClockingMvpView {
     }
 
     @Override
+    protected void onResume() {
+        super.onResume();
+        if(!mBiometricsManager.biometricsInitialized()){
+            mBiometricsManager.initializeBiometrics(new Biometrics.OnInitializedListener() {
+                @Override
+                public void onInitialized(Biometrics.ResultCode resultCode, String sdkVersion, String requiredVersion) {
+                    Log.d("BioActivity", "onBiometricsInitialized");
+                }
+            });
+        }
+    }
+
+    @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         mBiometricsManager.onActivityResult(requestCode, resultCode, data);
     }
@@ -158,7 +173,14 @@ public class ClockingActivity extends BaseActivity implements ClockingMvpView {
     }
 
     @Override
-    public void onError() {
+    public void onError(String reason) {
+        fingerView.setImageDrawable(null);
+        Toast.makeText(ClockingActivity.this, reason, Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void onMatchFailed() {
+        fingerView.setImageDrawable(null);
         FragmentManager fragmentManager = getSupportFragmentManager();
         ErrorModal modal = ErrorModal.newInstance();
         modal.show(fragmentManager, DISPLAY_MATCH_ERROR_TAG);
@@ -171,6 +193,7 @@ public class ClockingActivity extends BaseActivity implements ClockingMvpView {
 
     @Override
     public void displayInfo(Beneficiary beneficiary) {
+        fingerView.setImageDrawable(null);
         FragmentManager fragmentManager = getSupportFragmentManager();
         ResultModal modal = ResultModal.newInstance(beneficiary);
         modal.show(fragmentManager, DISPLAY_CLOCK_INFO_TAG);
@@ -178,6 +201,7 @@ public class ClockingActivity extends BaseActivity implements ClockingMvpView {
 
     @Override
     public void displayLittleInfo(Clock clock) {
+        fingerView.setImageDrawable(null);
         FragmentManager fragmentManager = getSupportFragmentManager();
         ResultModal modal = ResultModal.newInstance(clock);
         modal.show(fragmentManager, DISPLAY_CLOCK_INFO_TAG);

@@ -139,4 +139,22 @@ public class DatabaseHelper {
             }
         });
     }
+
+    public Observable<Void> deleteAllClocks() {
+        return Observable.create(new Observable.OnSubscribe<Void>() {
+            @Override
+            public void call(Subscriber<? super Void> subscriber) {
+                if(subscriber.isUnsubscribed()) return;
+                BriteDatabase.Transaction transaction = mDb.newTransaction();
+                try{
+                    mDb.delete(Db.Clocks.TABLE_NAME, null);
+                    subscriber.onNext(null);
+                    transaction.markSuccessful();
+                    subscriber.onCompleted();
+                }finally {
+                    transaction.end();
+                }
+            }
+        });
+    }
 }
